@@ -42,11 +42,15 @@ namespace App_Gym
             if (usertype == "Admin")
             {
                 AdminSettings ads = new AdminSettings();
+                this.Hide();
                 ads.Show();
             }
-            else if (usertype == "User")
+            else if (usertype == "User" || usertype == "Trainer")
             {
-                MessageBox.Show("Only Admins Can Login this page, Please Login As Admin", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                UserSetting uss = new UserSetting();
+                this.Hide();
+                uss.Show();
+                //MessageBox.Show("Only Admins Can Login this page, Please Login As Admin", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Stop);
             }
         }
 
@@ -91,11 +95,18 @@ namespace App_Gym
 
         private void addmembersbtn_Click(object sender, EventArgs e)
         {
-            addMemberControl1 = new AddMemberControl();
-            reset_bg();
-            addmembersbtn.BackColor = ColorTranslator.FromHtml("#E8290B");
-            Addview(addMemberControl1);
-            NavTitle.Text = "Add Members";
+            if (usertype == "Admin")
+            {
+                addMemberControl1 = new AddMemberControl();
+                reset_bg();
+                addmembersbtn.BackColor = ColorTranslator.FromHtml("#E8290B");
+                Addview(addMemberControl1);
+                NavTitle.Text = "Add Members";
+            }    
+            else
+            {
+                MessageBox.Show("Only Admins Can Login this page, Please Login As Admin", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+            }
         }
 
         private void AddEquipmentsbtn_Click(object sender, EventArgs e)
@@ -136,11 +147,18 @@ namespace App_Gym
 
         private void RemoveMemberBtn_Click(object sender, EventArgs e)
         {
-            addstaff1 = new Addstaff();
-            reset_bg();
-            RemoveMemberBtn.BackColor = ColorTranslator.FromHtml("#E8290B");
-            Addview(addstaff1);
-            NavTitle.Text = "Add Staff";
+            if (usertype == "Admin")
+            {
+                addstaff1 = new Addstaff();
+                reset_bg();
+                RemoveMemberBtn.BackColor = ColorTranslator.FromHtml("#E8290B");
+                Addview(addstaff1);
+                NavTitle.Text = "Add Staff";
+            }
+            else
+            {
+                MessageBox.Show("Only Admins Can Login this page, Please Login As Admin", "Access Denied", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+            }
         }
         private void Addview(UserControl f)
         {

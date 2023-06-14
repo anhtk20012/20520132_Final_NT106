@@ -93,3 +93,8 @@ SELECT * FROM EquipmentTable
 SELECT * FROM StaffTable 
 SELECT * FROM MemberTable 
 SELECT * FROM GymDetails
+
+DELETE FROM Accounts WHERE UserId = 5
+DELETE FROM MemberTable WHERE memberid = 11
+
+INSERT INTO Accounts VALUES ('Trainer','latronganh','anhtk20012@gmail.com','anhtk123')

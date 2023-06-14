@@ -119,12 +119,8 @@
             this.StaffDesigBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.StaffDesigBox.FormattingEnabled = true;
             this.StaffDesigBox.Items.AddRange(new object[] {
-            "Operations Manager",
             "Group Fitness Instructor",
-            "Certified Personal Trainer",
-            "Maintenance Personnel",
-            "Service Technician",
-            "Front-Desk Staff"});
+            "Certified Personal Trainer"});
             this.StaffDesigBox.Location = new System.Drawing.Point(45, 290);
             this.StaffDesigBox.Margin = new System.Windows.Forms.Padding(4);
             this.StaffDesigBox.Name = "StaffDesigBox";

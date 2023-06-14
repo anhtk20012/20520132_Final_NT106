@@ -21,8 +21,20 @@ namespace App_Gym
         string constr = @"Data Source=LATRONGANH\SQLEXPRESS;Initial Catalog=GMSDataBase;Integrated Security=True";
         string characterpattern = @"^[a-zA-Z]+$";
         string phonenregex = "^[0-9]{1}";
+
+        string usertype = LoginPage.usertype;
         private void ViewEquipmentControls_Load(object sender, EventArgs e)
         {
+            if (usertype == "Admin")
+            {
+                DeleteBtn.Enabled = true;
+                Updatebtn.Enabled = true;
+            }
+            else
+            {
+                DeleteBtn.Enabled = false;
+                Updatebtn.Enabled = false;
+            }    
             GetEquipmentData();
             EquipmentDataGridView.BorderStyle = BorderStyle.None;
             EquipmentDataGridView.AlternatingRowsDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#DAE0E2");

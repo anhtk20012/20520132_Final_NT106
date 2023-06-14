@@ -40,7 +40,7 @@ namespace App_Gym
                 {
                     SqlConnection con = new SqlConnection(constr);
                     SqlCommand cmd = new SqlCommand("Insert into MemberTable Values(@Membername, @fathername, @gender, @age, @phoneNo, @Emailid, @Address, @joiningDate, @renewaldate, @membershiptype, @feepaid, @timings, @photo)", con);
-
+                    
                     cmd.CommandType = CommandType.Text;
                     cmd.Parameters.AddWithValue("@Membername", fullnametxtbox.Text);
                     cmd.Parameters.AddWithValue("@fathername", fathernametxtbox.Text);
@@ -55,9 +55,18 @@ namespace App_Gym
                     cmd.Parameters.AddWithValue("@feepaid", feebox.Text);
                     cmd.Parameters.AddWithValue("@timings", GymTimingBox.Text);
                     cmd.Parameters.AddWithValue("@photo", savephoto());
+                    
+                    SqlCommand create_cmd = new SqlCommand("Insert into Accounts Values(@UserType, @UserName, @UserEmailID, @UserPassword)", con);
+
+                    create_cmd.CommandType = CommandType.Text;
+                    create_cmd.Parameters.AddWithValue("@UserType", "User");
+                    create_cmd.Parameters.AddWithValue("@UserName", Emailbox.Text);
+                    create_cmd.Parameters.AddWithValue("@UserEmailID", Emailbox.Text);
+                    create_cmd.Parameters.AddWithValue("@UserPassword", "gymapp1234");
 
                     con.Open();
                     cmd.ExecuteNonQuery();
+                    create_cmd.ExecuteNonQuery();
                     con.Close();
                     SendGreetings();
                     MessageBox.Show("user info saved successfully");
@@ -90,9 +99,9 @@ namespace App_Gym
                 MailAddress ToEmail = new MailAddress(Emailbox.Text, fullnametxtbox.Text);
                 MailMessage Message = new MailMessage()
                 {
-                    From = fromEmail, 
+                    From = fromEmail,
                     Subject = gymname + " - THANKS YOU FOR JOINING OUR GYM",
-                    Body = "HELLO " + fullnametxtbox.Text + " THANK YOU FOR JOINING WITH US, YOUR PLAN DETAILS ARE, JOINED ON " + todaysDatepicker.Text + " AND YOUR RENEWAL DATE IS " + renewalDatepicker.Text + " AND FEE PAID = " + feebox.Text + " REGARDS " + gymname
+                    Body = "HELLO " + fullnametxtbox.Text + " THANK YOU FOR JOINING WITH US, YOUR PLAN DETAILS ARE, JOINED ON " + todaysDatepicker.Text + " AND YOUR RENEWAL DATE IS " + renewalDatepicker.Text + " AND FEE PAID = " + feebox.Text + " REGARDS " + gymname + " ; Account: Email ; Password: gymapp1234"
                 };
                 Message.To.Add(ToEmail);
                 client.SendCompleted += Client_SendCompleted;

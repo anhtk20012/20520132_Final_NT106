@@ -20,9 +20,20 @@ namespace App_Gym
             InitializeComponent();
         }
         string constr = @"Data Source=LATRONGANH\SQLEXPRESS;Initial Catalog=GMSDataBase;Integrated Security=True";
+        string usertype = LoginPage.usertype;
 
         private void GymStaffControls_Load(object sender, EventArgs e)
         {
+            if (usertype == "Admin")
+            {
+                button1.Enabled = true;
+                RemoveStaffbtn.Enabled = true;
+            }   
+            else
+            {
+                button1.Enabled = false;
+                RemoveStaffbtn.Enabled = false;
+            }    
             GetStaffDetails();
             StaffDataGridView.BorderStyle = BorderStyle.None;
             StaffDataGridView.AlternatingRowsDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#DAE0E2");

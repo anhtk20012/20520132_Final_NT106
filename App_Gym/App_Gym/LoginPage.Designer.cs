@@ -152,7 +152,8 @@
             this.UserTypeBox.FormattingEnabled = true;
             this.UserTypeBox.Items.AddRange(new object[] {
             "Admin",
-            "User"});
+            "User",
+            "Trainer"});
             this.UserTypeBox.Location = new System.Drawing.Point(228, 23);
             this.UserTypeBox.Margin = new System.Windows.Forms.Padding(4);
             this.UserTypeBox.Name = "UserTypeBox";

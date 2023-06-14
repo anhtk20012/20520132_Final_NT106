@@ -80,7 +80,7 @@ namespace App_Gym
                         MainPage main = new MainPage();
                         main.Show();
                     }
-                    if (dt1.Rows[0][0].ToString() == "User")
+                    if (dt1.Rows[0][0].ToString() == "User" || dt1.Rows[0][0].ToString() == "Trainer")
                     {
                         this.Hide();
                         MainPage foruser = new MainPage();

@@ -384,9 +384,20 @@ namespace App_Gym
                 renewalDatepicker.Value = todaysDatepicker.Value.AddDays(365);
             }
         }
+        string usertype = LoginPage.usertype;
 
         private void ViewMembers_Load(object sender, EventArgs e)
         {
+            if (usertype == "Admin")
+            {
+                updatebtn.Enabled = true;
+                removebtn.Enabled = true;
+            }    
+            else
+            {
+                updatebtn.Enabled = false;
+                removebtn.Enabled = false;
+            }    
             GetMembersData();
             MembersDataGridView.BorderStyle = BorderStyle.None;
             MembersDataGridView.AlternatingRowsDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#DAE0E2");

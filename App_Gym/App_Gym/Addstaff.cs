@@ -47,6 +47,13 @@ namespace App_Gym
                 cmd.Parameters.AddWithValue("@IDProof", StaffIdentityProof.Text);
                 cmd.Parameters.AddWithValue("@photo", savephoto());
 
+                SqlCommand create_cmd = new SqlCommand("Insert into Accounts Values(@UserType, @UserName, @UserEmailID, @UserPassword)", con);
+
+                create_cmd.CommandType = CommandType.Text;
+                create_cmd.Parameters.AddWithValue("@UserType", "Trainer");
+                create_cmd.Parameters.AddWithValue("@UserName", StaffEmailID.Text);
+                create_cmd.Parameters.AddWithValue("@UserEmailID", StaffEmailID.Text);
+                create_cmd.Parameters.AddWithValue("@UserPassword", "gymapp1234");
 
                 con.Open();
                 cmd.ExecuteNonQuery();
