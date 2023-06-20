@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -13,36 +15,55 @@ namespace App_Gym
 {
     public partial class AddEquipmentsControl : UserControl
     {
+        class myData
+        {
+            public int EquipmentID { get; set; }
+            public string EquipmentName { get; set; }
+            public string EquipmentType { get; set; }
+            public string EquipmentQuantity { get; set; }
+            public string EquipmentWeight { get; set; }
+            public string EquipmentCost { get; set; }
+            public DateTime PurchasedDate { get; set; }
+        }
+        private const string BaseUrl = "https://localhost:7046/api/EquipmentTables";
+        private HttpClient httpClient;
         public AddEquipmentsControl()
         {
             InitializeComponent();
+            httpClient = new HttpClient();
         }
-        string constr = @"Data Source=LATRONGANH\SQLEXPRESS;Initial Catalog=GMSDataBase;Integrated Security=True";
 
-        private void AddEquipmentButton_Click(object sender, EventArgs e)
+        private async void AddEquipmentButton_Click(object sender, EventArgs e)
         {
             if (isValid())
             {
+                var requestData = new myData()
+                {
+                    EquipmentID = 0,
+                    EquipmentName = EquipmentNameTextbox.Text,
+                    EquipmentType = EquipmentTypeBox.Text,
+                    EquipmentQuantity = EquipmentQuantityTextbox.Text,
+                    EquipmentWeight = EquipmentWeightTextbox.Text,
+                    EquipmentCost = EquipmentCostTextbox.Text,
+                    PurchasedDate = dateTimePicker1.Value
+                };
+                try
+                {
+                    string apiUrl = BaseUrl;
+                    string jsonData = JsonConvert.SerializeObject(requestData);
+                    HttpContent content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                    var response = await httpClient.PostAsync(apiUrl, content);
 
-                SqlConnection con = new SqlConnection(constr);
-
-                SqlCommand cmd = new SqlCommand("Insert into EquipmentTable Values(@EquipmentName, @EquipmentType, @EquipmentQuantity, @EquipmentWeight, @EquipmentCost, @PurchasedDate)", con);
-
-                cmd.CommandType = CommandType.Text;
-                cmd.Parameters.AddWithValue("@EquipmentName", EquipmentNameTextbox.Text);
-                cmd.Parameters.AddWithValue("@EquipmentType", EquipmentTypeBox.Text);
-                cmd.Parameters.AddWithValue("@EquipmentQuantity", EquipmentQuantityTextbox.Text);
-                cmd.Parameters.AddWithValue("@EquipmentWeight", EquipmentWeightTextbox.Text);
-                cmd.Parameters.AddWithValue("@EquipmentCost", EquipmentCostTextbox.Text);
-                cmd.Parameters.AddWithValue("@PurchasedDate", dateTimePicker1.Value);
-
-                con.Open();
-                cmd.ExecuteNonQuery();
-                con.Close();
-
-
-                MessageBox.Show("success");
-                resetboxes();
+                    if (response.IsSuccessStatusCode)
+                    {
+                        MessageBox.Show("successfully added");
+                        resetboxes();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
         public void resetboxes()

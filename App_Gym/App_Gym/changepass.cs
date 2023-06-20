@@ -1,21 +1,35 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace App_Gym
 {
     public partial class changepass : Form
     {
+        class myData
+        {
+            public int UserId { get; set; }
+            public string UserType { get; set; }
+            public string UserName { get; set; }
+            public string UserEmailID { get; set; }
+            public string UserPassword { get; set; }
+        }
+        private const string BaseUrl = "https://localhost:7046/api/Accounts";
+        private HttpClient httpClient;
         public changepass()
         {
             InitializeComponent();
+            httpClient = new HttpClient();
         }
 
         public const int WM_NCLBUTTONDOWN = 0xA1;
@@ -26,8 +40,6 @@ namespace App_Gym
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         public static extern bool ReleaseCapture();
 
-        string constr = @"Data Source=LATRONGANH\SQLEXPRESS;Initial Catalog=GMSDataBase;Integrated Security=True";
-
         string username = ForgotPasswordPage.to;
 
         private void closebox_Click(object sender, EventArgs e)
@@ -37,29 +49,60 @@ namespace App_Gym
             fpp.Show();
         }
 
-        private void changepassbtn_Click(object sender, EventArgs e)
+        private async void changepassbtn_Click(object sender, EventArgs e)
         {
+
             if (passtextbox.Text == confirmtextbox.Text)
             {
-                SqlConnection con = new SqlConnection(constr);
-                SqlCommand cmd = new SqlCommand("Update Accounts Set UserType =@UserType, UserName =@UserName, UserEmailID =@UserEmailID, UserPassword =@UserPassword Where UserEmailID ='" + username + "'  ", con);
+                int id_change = 0;
+                try
+                {
+                    string apiUrl = BaseUrl;
+                    var response = await httpClient.GetAsync(apiUrl);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var responseData = await response.Content.ReadAsStringAsync();
+                        var data = JsonConvert.DeserializeObject<List<myData>>(responseData);
+                        foreach (var item in data)
+                        {
+                            if (item.UserEmailID == EmailTextbox.Text)
+                            {
+                                id_change = item.UserId;
+                            }    
+                        }    
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                var requestData = new myData()
+                {
+                    UserId = id_change,
+                    UserType = UserType.Text,
+                    UserName = UserNameTextbox.Text,
+                    UserEmailID = EmailTextbox.Text,
+                    UserPassword = confirmtextbox.Text,
+                };
+                try
+                {
+                    string apiUrl = BaseUrl + "/" + id_change;
+                    string jsonData = JsonConvert.SerializeObject(requestData);
+                    HttpContent content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                    var response = await httpClient.PutAsync(apiUrl, content);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        MessageBox.Show("Password Updated Successfully, Please login with your new credentials", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        LoginPage lp = new LoginPage();
+                        this.Hide();
+                        lp.Show();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
 
-                cmd.CommandType = CommandType.Text;
-
-                cmd.Parameters.AddWithValue("@UserType", UserType.Text);
-                cmd.Parameters.AddWithValue("@UserName", UserNameTextbox.Text);
-                cmd.Parameters.AddWithValue("@UserEmailID", EmailTextbox.Text);
-                cmd.Parameters.AddWithValue("@UserPassword", confirmtextbox.Text);
-
-
-                con.Open();
-                cmd.ExecuteNonQuery();
-                con.Close();
-
-                MessageBox.Show("Password Updated Successfully, Please login with your new credentials", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                LoginPage lp = new LoginPage();
-                this.Hide();
-                lp.Show();
             }
             else
             {
@@ -72,20 +115,30 @@ namespace App_Gym
             getdetails();
             EmailTextbox.Text = username;
         }
-        private void getdetails()
+        private async void getdetails()
         {
-            SqlConnection con = new SqlConnection(constr);
-            SqlCommand cmd = new SqlCommand("Select UserType, UserName, UserEmailID, UserPassword from Accounts Where UserEmailID = '" + username + "' ", con);
-
-            con.Open();
-            SqlDataReader sdr = cmd.ExecuteReader();
-            while (sdr.Read())
+            try
             {
-                UserType.Text = sdr.GetValue(0).ToString();
-                UserNameTextbox.Text = sdr.GetValue(1).ToString();
-                EmailTextbox.Text = sdr.GetValue(2).ToString();
+                var response = await httpClient.GetAsync(BaseUrl);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseData = await response.Content.ReadAsStringAsync();
+                    var data = JsonConvert.DeserializeObject<List<myData>>(responseData);
+                    foreach (var item in data)
+                    {
+                        if (username == item.UserEmailID)
+                        {
+                            UserType.Text = item.UserType;
+                            UserNameTextbox.Text = item.UserName;
+                            EmailTextbox.Text = item.UserEmailID;
+                        }    
+                    }
+                }
             }
-            con.Close();
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void dragpanel_MouseDown(object sender, MouseEventArgs e)

@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -13,11 +15,63 @@ namespace App_Gym
 {
     public partial class DashboardControl : UserControl
     {
+        class myData
+        {
+            public int memberid { get; set; }
+            public string membername { get; set; }
+            public string fathername { get; set; }
+            public string gender { get; set; }
+            public int age { get; set; }
+            public string phoneNo { get; set; }
+            public string Emailid { get; set; }
+            public string Address { get; set; }
+            public DateTime joiningDate { get; set; }
+            public DateTime renewaldate { get; set; }
+            public string membershiptype { get; set; }
+            public int feepaid { get; set; }
+            public string timings { get; set; }
+            public byte[] photo { get; set; }
+        }
+        
+        class myData1
+        {
+            public int staffid { get; set; }
+            public string staffname { get; set; }
+            public string fathername { get; set; }
+            public string gender { get; set; }
+            public int age { get; set; }
+            public string phoneNo { get; set; }
+            public string Emailid { get; set; }
+            public string Address { get; set; }
+            public DateTime joiningDate { get; set; }
+            public string staffdesignation { get; set; }
+            public int salary { get; set; }
+            public string shifttime { get; set; }
+            public string IDtype { get; set; }
+            public string IDProof { get; set; }
+            public byte[] photo { get; set; }
+        }
+        class myData2
+        {
+            public int EquipmentID { get; set; }
+            public string EquipmentName { get; set; }
+            public string EquipmentType { get; set; }
+            public string EquipmentQuantity { get; set; }
+            public string EquipmentWeight { get; set; }
+            public string EquipmentCost { get; set; }
+            public DateTime PurchasedDate { get; set; }
+        }
+
+        private const string BaseUrl = "https://localhost:7046/api/MemberTables";
+        private const string BaseUrl1 = "https://localhost:7046/api/StaffTables";
+        private const string BaseUrl2 = "https://localhost:7046/api/EquipmentTables";
+        private HttpClient httpClient;
         public DashboardControl()
         {
             InitializeComponent();
+            httpClient = new HttpClient();
         }
-        string constr = @"Data Source=LATRONGANH\SQLEXPRESS;Initial Catalog=GMSDataBase;Integrated Security=True";
+
         private void RefreshDashBoard_Click(object sender, EventArgs e)
         {
             totalclients();
@@ -65,120 +119,167 @@ namespace App_Gym
             ExpiredAccountsList.ColumnHeadersDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#2F363F");
             ExpiredAccountsList.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
         }
-        private void totalclientsFee()
+        string username = LoginPage.User;
+        string usertype = LoginPage.usertype;
+        
+        private async void totalclientsFee()
         {
-            SqlConnection con = new SqlConnection(constr);
-            SqlCommand cmd = new SqlCommand("Select * from MemberTable", con);
-
-            if (con.State == ConnectionState.Closed)
+            if (usertype == "Admin")
             {
-                con.Open();
-            }
-            SqlDataReader sdr = cmd.ExecuteReader();
-
-            DataTable dtclients = new DataTable();
-            dtclients.Load(sdr);
-            con.Close();
-            EarningsDGV.DataSource = dtclients;
-
-            decimal Total = 0;
-
-            for (int i = 0; i < EarningsDGV.Rows.Count; i++)
+                clientfeepanel.Visible = true;
+                try
+                {
+                    var response = await httpClient.GetAsync(BaseUrl);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var responseData = await response.Content.ReadAsStringAsync();
+                        var data = JsonConvert.DeserializeObject<List<myData>>(responseData);
+                        decimal Total = 0;
+                        foreach (var item in data)
+                        {
+                            Total += Convert.ToDecimal(item.feepaid);
+                        }    
+                        TotalEarnedLabel.Text = "$" + Total.ToString();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }   
+            if (usertype == "User" || usertype == "Trainer")
             {
-                Total += Convert.ToDecimal(EarningsDGV.Rows[i].Cells["FeePaid"].Value);
-            }
-
-
-            TotalEarnedLabel.Text = "$" + Total.ToString();
+                clientfeepanel.Visible = false;
+            }    
+            
         }
 
-        //get total clients number
-        private void totalclients()
+        private async void totalclients()
         {
-            SqlConnection con = new SqlConnection(constr);
-            string sql = "Select * from MemberTable";
-
-            if (con.State == ConnectionState.Closed)
+            try
             {
-                con.Open();
+                var response = await httpClient.GetAsync(BaseUrl);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseData = await response.Content.ReadAsStringAsync();
+                    var data = JsonConvert.DeserializeObject<List<myData>>(responseData); 
+                    totalclientslabel.Text = data.Count.ToString();
+                }
             }
-            DataSet ds = new DataSet();
-            SqlDataAdapter da = new SqlDataAdapter(sql, con);
-            da.Fill(ds);
-            SqlCommandBuilder builder = new SqlCommandBuilder(da);
-            totalclientsDGV.DataSource = ds.Tables[0];
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
 
-            totalclientslabel.Text = ds.Tables[0].Rows.Count.ToString();
         }
-        // get total staff numbers
-        private void totalstaff()
+        private async void totalstaff()
         {
-            SqlConnection con = new SqlConnection(constr);
-            string sql = "Select * from StaffTable";
-
-            if (con.State == ConnectionState.Closed)
+            try
             {
-                con.Open();
+                var response = await httpClient.GetAsync(BaseUrl1);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseData = await response.Content.ReadAsStringAsync();
+                    var data = JsonConvert.DeserializeObject<List<myData>>(responseData);
+                    totalstafflabel.Text = data.Count.ToString();
+                }
             }
-            DataSet ds = new DataSet();
-            SqlDataAdapter da = new SqlDataAdapter(sql, con);
-            da.Fill(ds);
-            SqlCommandBuilder builder = new SqlCommandBuilder(da);
-            totalstaffDGV.DataSource = ds.Tables[0];
-
-            totalstafflabel.Text = ds.Tables[0].Rows.Count.ToString();
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            } 
         }
-        // get total equipments data
-        private void totalequipments()
+        private async void totalequipments()
         {
-            SqlConnection con = new SqlConnection(constr);
-            string sql = "Select * from EquipmentTable";
-
-            if (con.State == ConnectionState.Closed)
+            try
             {
-                con.Open();
+                var response = await httpClient.GetAsync(BaseUrl2);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseData = await response.Content.ReadAsStringAsync();
+                    var data = JsonConvert.DeserializeObject<List<myData>>(responseData);
+                    totalequiplabel.Text = data.Count.ToString();
+                }
             }
-            DataSet ds = new DataSet();
-            SqlDataAdapter da = new SqlDataAdapter(sql, con);
-            da.Fill(ds);
-            SqlCommandBuilder builder = new SqlCommandBuilder(da);
-            TotalequipmentsDGV.DataSource = ds.Tables[0];
-
-            totalequiplabel.Text = ds.Tables[0].Rows.Count.ToString();
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
-        private void loadExpiryingAccounts()
+        private async void loadExpiryingAccounts()
         {
-            SqlConnection con = new SqlConnection(constr);
-            SqlCommand cmd = new SqlCommand("Select MemberID, Membername, JoiningDate, RenewalDate from MemberTable Where RenewalDate Between '" + dateTime.Value.AddDays(1).ToString("MM/dd/yyyy") + "' And '" + dateTime.Value.AddDays(8).ToString("MM/dd/yyyy") + "' ", con);
-
-            if (con.State == ConnectionState.Closed)
+            try
             {
-                con.Open();
+                var response = await httpClient.GetAsync(BaseUrl);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseData = await response.Content.ReadAsStringAsync();
+                    var data = JsonConvert.DeserializeObject<List<myData>>(responseData);
+                    
+                    DataTable dataTable = new DataTable();
+                    dataTable.Columns.Add("MemberID", typeof(int));
+                    dataTable.Columns.Add("Membername", typeof(string));
+                    dataTable.Columns.Add("JoiningDate", typeof(DateTime));
+                    dataTable.Columns.Add("RenewalDate", typeof(DateTime));
+                    DateTime date1 = DateTime.Now;
+                    DateTime date2 = DateTime.Now.AddDays(7);
+                    foreach (var item in data)
+                    {
+                        if (item.renewaldate >= date1 && item.renewaldate <= date2)
+                        {
+                            DataRow row = dataTable.NewRow();
+                            row["MemberID"] = item.memberid;
+                            row["Membername"] = item.membername;
+                            row["JoiningDate"] = item.joiningDate;
+                            row["RenewalDate"] = item.renewaldate;
+                            dataTable.Rows.Add(row);
+                        }
+                    }
+                    ExpiryDates.DataSource = dataTable;
+                }
+            }   
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            SqlDataReader sdr = cmd.ExecuteReader();
-            DataTable dtclients = new DataTable();
-            dtclients.Load(sdr);
-            con.Close();
-            ExpiryDates.DataSource = dtclients;
         }
 
-        string yesterday = DateTime.Now.AddDays(-1).ToString("MM/dd/yyyy");
-
-        private void loadExpiredAccounts()
+        private async void loadExpiredAccounts()
         {
-            SqlConnection con = new SqlConnection(constr);
-            SqlCommand cmd = new SqlCommand("Select MemberID, Membername, JoiningDate, RenewalDate from MemberTable Where RenewalDate Between '" + yesterday + "' And '" + dateTime.Value.AddDays(1).ToString("MM/dd/yyyy") + "' ", con);
-
-
-            if (con.State == ConnectionState.Closed)
+            try
             {
-                con.Open();
+                var response = await httpClient.GetAsync(BaseUrl);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseData = await response.Content.ReadAsStringAsync();
+                    var data = JsonConvert.DeserializeObject<List<myData>>(responseData);
+
+                    DataTable dataTable = new DataTable();
+                    dataTable.Columns.Add("MemberID", typeof(int));
+                    dataTable.Columns.Add("Membername", typeof(string));
+                    dataTable.Columns.Add("JoiningDate", typeof(DateTime));
+                    dataTable.Columns.Add("RenewalDate", typeof(DateTime));
+                    DateTime date1 = DateTime.Now.AddDays(-1);
+                    DateTime date2 = DateTime.Now;
+                    foreach (var item in data)
+                    {
+                        if (item.renewaldate >= date1 && item.renewaldate <= date2)
+                        {
+                            DataRow row = dataTable.NewRow();
+                            row["MemberID"] = item.memberid;
+                            row["Membername"] = item.membername;
+                            row["JoiningDate"] = item.joiningDate;
+                            row["RenewalDate"] = item.renewaldate;
+                            dataTable.Rows.Add(row);
+                        }
+                    }
+                    ExpiredAccountsList.DataSource = dataTable;
+                }
             }
-            SqlDataReader sdr = cmd.ExecuteReader();
-            DataTable dtclients = new DataTable();
-            dtclients.Load(sdr);
-            con.Close();
-            ExpiredAccountsList.DataSource = dtclients;
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void pictureBox1_Click(object sender, EventArgs e)

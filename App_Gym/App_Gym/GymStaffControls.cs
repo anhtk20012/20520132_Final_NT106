@@ -1,4 +1,5 @@
 ﻿using App_Gym.Properties;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -7,21 +8,55 @@ using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace App_Gym
 {
     public partial class GymStaffControls : UserControl
     {
+        class myData
+        {
+            public int staffid { get; set; }
+            public string staffname { get; set; }
+            public string fathername { get; set; }
+            public string gender { get; set; }
+            public int age { get; set; }
+            public string phoneNo { get; set; }
+            public string Emailid { get; set; }
+            public string Address { get; set; }
+            public DateTime joiningDate { get; set; }
+            public string staffdesignation { get; set; }
+            public int salary { get; set; }
+            public string shifttime { get; set; }
+            public string IDtype { get; set; }
+            public string IDProof { get; set; }
+            public byte[] photo { get; set; }
+        }
+        class myData1
+        {
+            public int UserId { get; set; }
+            public string UserType { get; set; }
+            public string UserName { get; set; }
+            public string UserEmailID { get; set; }
+            public string UserPassword { get; set; }
+        }
+
+        private const string BaseUrl = "https://localhost:7046/api/StaffTables";
+        private const string BaseUrl1 = "https://localhost:7046/api/Accounts";
+        private HttpClient httpClient;
         public GymStaffControls()
         {
             InitializeComponent();
+            httpClient = new HttpClient();
         }
-        string constr = @"Data Source=LATRONGANH\SQLEXPRESS;Initial Catalog=GMSDataBase;Integrated Security=True";
         string usertype = LoginPage.usertype;
-
+        string useremail = LoginPage.Email;
         private void GymStaffControls_Load(object sender, EventArgs e)
         {
             if (usertype == "Admin")
@@ -66,7 +101,7 @@ namespace App_Gym
             }
         }
 
-        private void SearchByIdentity_Click(object sender, EventArgs e)
+        private async void SearchByIdentity_Click(object sender, EventArgs e)
         {
             if (textBox1.Text == "Search by ID Proof" || textBox1.Text == "")
             {
@@ -75,20 +110,63 @@ namespace App_Gym
             }
             else
             {
-                SqlConnection con = new SqlConnection(constr);
-                SqlCommand cmd = new SqlCommand("Select * from StaffTable Where IDProof LIKE '%" + textBox1.Text + "%'", con);
-
-                con.Open();
-                SqlDataReader sdr = cmd.ExecuteReader();
-
-                DataTable dtstaff = new DataTable();
-                dtstaff.Load(sdr);
-                con.Close();
-                StaffDataGridView.DataSource = dtstaff;
+                try
+                {
+                    var response = await httpClient.GetAsync(BaseUrl);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var responseData = await response.Content.ReadAsStringAsync();
+                        var data = JsonConvert.DeserializeObject<List<myData>>(responseData);
+                        DataTable dataTable = new DataTable();
+                        dataTable.Columns.Add("StaffID", typeof(int));
+                        dataTable.Columns.Add("StaffName", typeof(string));
+                        dataTable.Columns.Add("FatherName", typeof(string));
+                        dataTable.Columns.Add("Gender", typeof(string));
+                        dataTable.Columns.Add("Age", typeof(int));
+                        dataTable.Columns.Add("PhoneNo", typeof(string));
+                        dataTable.Columns.Add("EmailID", typeof(string));
+                        dataTable.Columns.Add("Address", typeof(string));
+                        dataTable.Columns.Add("JoiningDate", typeof(DateTime));
+                        dataTable.Columns.Add("StaffDesignation", typeof(string));
+                        dataTable.Columns.Add("Salary", typeof(int));
+                        dataTable.Columns.Add("ShiftTime", typeof(string));
+                        dataTable.Columns.Add("IDType", typeof(string));
+                        dataTable.Columns.Add("IDProof", typeof(string));
+                        dataTable.Columns.Add("Photo", typeof(byte[]));
+                        foreach (var item in data)
+                        {
+                            if (item.staffid == Int32.Parse(textBox1.Text))
+                            {
+                                DataRow row = dataTable.NewRow();
+                                row["StaffID"] = item.staffid;
+                                row["StaffName"] = item.staffname;
+                                row["FatherName"] = item.fathername;
+                                row["Gender"] = item.gender;
+                                row["Age"] = item.age;
+                                row["PhoneNo"] = item.phoneNo;
+                                row["EmailID"] = item.Emailid;
+                                row["Address"] = item.Address;
+                                row["JoiningDate"] = item.joiningDate;
+                                row["StaffDesignation"] = item.staffdesignation;
+                                row["Salary"] = item.salary;
+                                row["ShiftTime"] = item.shifttime;
+                                row["IDType"] = item.IDtype;
+                                row["IDProof"] = item.IDProof;
+                                row["Photo"] = item.photo;
+                                dataTable.Rows.Add(row);
+                            }
+                        }
+                        StaffDataGridView.DataSource = dataTable;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
-        private void SearchByIdBtn_Click(object sender, EventArgs e)
+        private async void SearchByIdBtn_Click(object sender, EventArgs e)
         {
             if (SearchByIDTextbox.Text == "Search by Name" || SearchByIDTextbox.Text == "")
             {
@@ -97,18 +175,59 @@ namespace App_Gym
             }
             else
             {
-
-                SqlConnection con = new SqlConnection(constr);
-
-                SqlCommand cmd = new SqlCommand("Select * from StaffTable Where StaffName LIKE '%" + SearchByIDTextbox.Text + "%'", con);
-
-                con.Open();
-                SqlDataReader sdr = cmd.ExecuteReader();
-
-                DataTable dtstaff = new DataTable();
-                dtstaff.Load(sdr);
-                con.Close();
-                StaffDataGridView.DataSource = dtstaff;
+                try
+                {
+                    var response = await httpClient.GetAsync(BaseUrl);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var responseData = await response.Content.ReadAsStringAsync();
+                        var data = JsonConvert.DeserializeObject<List<myData>>(responseData);
+                        DataTable dataTable = new DataTable();
+                        dataTable.Columns.Add("StaffID", typeof(int));
+                        dataTable.Columns.Add("StaffName", typeof(string));
+                        dataTable.Columns.Add("FatherName", typeof(string));
+                        dataTable.Columns.Add("Gender", typeof(string));
+                        dataTable.Columns.Add("Age", typeof(int));
+                        dataTable.Columns.Add("PhoneNo", typeof(string));
+                        dataTable.Columns.Add("EmailID", typeof(string));
+                        dataTable.Columns.Add("Address", typeof(string));
+                        dataTable.Columns.Add("JoiningDate", typeof(DateTime));
+                        dataTable.Columns.Add("StaffDesignation", typeof(string));
+                        dataTable.Columns.Add("Salary", typeof(int));
+                        dataTable.Columns.Add("ShiftTime", typeof(string));
+                        dataTable.Columns.Add("IDType", typeof(string));
+                        dataTable.Columns.Add("IDProof", typeof(string));
+                        dataTable.Columns.Add("Photo", typeof(byte[]));
+                        foreach (var item in data)
+                        {
+                            if (item.staffname == SearchByIDTextbox.Text)
+                            {
+                                DataRow row = dataTable.NewRow();
+                                row["StaffID"] = item.staffid;
+                                row["StaffName"] = item.staffname;
+                                row["FatherName"] = item.fathername;
+                                row["Gender"] = item.gender;
+                                row["Age"] = item.age;
+                                row["PhoneNo"] = item.phoneNo;
+                                row["EmailID"] = item.Emailid;
+                                row["Address"] = item.Address;
+                                row["JoiningDate"] = item.joiningDate;
+                                row["StaffDesignation"] = item.staffdesignation;
+                                row["Salary"] = item.salary;
+                                row["ShiftTime"] = item.shifttime;
+                                row["IDType"] = item.IDtype;
+                                row["IDProof"] = item.IDProof;
+                                row["Photo"] = item.photo;
+                                dataTable.Rows.Add(row);
+                            }
+                        }
+                        StaffDataGridView.DataSource = dataTable;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
         private bool isvalid()
@@ -230,96 +349,234 @@ namespace App_Gym
             textBox1.ForeColor = Color.DarkGray;
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private async void button1_Click(object sender, EventArgs e)
         {
             if (isvalid())
             {
-                SqlConnection con = new SqlConnection(constr);
-                SqlCommand cmd = new SqlCommand("Update StaffTable set StaffName = @staffname, FatherName = @fathername, Gender = @gender, Age = @age, PhoneNo = @phoneNo, EmailID = @Emailid, Address = @Address, JoiningDate = @joiningDate, StaffDesignation = @staffdesignation, Salary = @salary, ShiftTime = @shifttime, IDType = @IDtype, IDProof = @IDProof, Photo = @photo Where StaffId = @staffid", con);
+                bool check_update = false;
+                string maillchange = "";
+                try
+                {
+                    string apiUrl = BaseUrl + "/" + StaffIDBox.Text;
+                    var response = await httpClient.GetAsync(apiUrl);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var responseData = await response.Content.ReadAsStringAsync();
+                        var data = JsonConvert.DeserializeObject<myData>(responseData);
+                        maillchange = data.Emailid;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                var requestData = new myData()
+                {
+                    staffid = Int32.Parse(StaffIDBox.Text),
+                    staffname = StaffNameBox.Text,
+                    fathername = genderbox.Text,
+                    gender = StaffAgeBox.Text,
+                    age = Int32.Parse(StaffAgeBox.Text),
+                    phoneNo = StaffPhoneNo.Text,
+                    Emailid = StaffEmailID.Text,
+                    Address = StaffAddressBox.Text,
+                    joiningDate = staffjoinedDate.Value,
+                    staffdesignation = StaffDesigBox.Text,
+                    salary = Int32.Parse(salarybox.Text),
+                    shifttime = ShiftTimeBox.Text,
+                    IDtype = IDTypeBox.Text,
+                    IDProof = StaffIdentityProof.Text,
+                    photo = savephoto()
+                };
+                try
+                {
+                    string apiUrl = BaseUrl + "/" + StaffIDBox.Text;
+                    string jsonData = JsonConvert.SerializeObject(requestData);
+                    HttpContent content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                    var response = await httpClient.PutAsync(apiUrl, content);
 
-                cmd.CommandType = CommandType.Text;
-                cmd.Parameters.AddWithValue("@staffname", StaffNameBox.Text);
-                cmd.Parameters.AddWithValue("@fathername", StaffFatherName.Text);
-                cmd.Parameters.AddWithValue("@gender", genderbox.Text);
-                cmd.Parameters.AddWithValue("@age", StaffAgeBox.Text);
-                cmd.Parameters.AddWithValue("@phoneNo", StaffPhoneNo.Text);
-                cmd.Parameters.AddWithValue("@Emailid", StaffEmailID.Text);
-                cmd.Parameters.AddWithValue("@Address", StaffAddressBox.Text);
-                cmd.Parameters.AddWithValue("@joiningDate", staffjoinedDate.Value);
-                cmd.Parameters.AddWithValue("@staffdesignation", StaffDesigBox.Text);
-                cmd.Parameters.AddWithValue("@salary", salarybox.Text);
-                cmd.Parameters.AddWithValue("@shifttime", ShiftTimeBox.Text);
-                cmd.Parameters.AddWithValue("@IDtype", IDTypeBox.Text);
-                cmd.Parameters.AddWithValue("@IDProof", StaffIdentityProof.Text);
-                cmd.Parameters.AddWithValue("@photo", savephoto());
-                cmd.Parameters.AddWithValue("staffid", StaffIDBox.Text);
-
-
-                con.Open();
-                cmd.ExecuteNonQuery();
-                con.Close();
-                MessageBox.Show("Staff Details Updated Successfully", "Saved Successfull", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                GetStaffDetails();
-                resetsearchboxes();
-                ResetAll();
-
-
+                    if (response.IsSuccessStatusCode)
+                    {
+                        check_update = true;
+                        
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                if (check_update)
+                {
+                    try
+                    {
+                        string apiUrl = BaseUrl1;
+                        var response = await httpClient.GetAsync(apiUrl);
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var responseData = await response.Content.ReadAsStringAsync();
+                            var data = JsonConvert.DeserializeObject<List<myData1>>(responseData);
+                            myData1 requestData1 = null;
+                            foreach (var item in data)
+                            {
+                                if (maillchange == item.UserEmailID && "Trainer" == item.UserType)
+                                {
+                                    requestData1 = new myData1()
+                                    {
+                                        UserId = item.UserId,
+                                        UserType = item.UserType,
+                                        UserName = item.UserName,
+                                        UserEmailID = StaffEmailID.Text,
+                                        UserPassword = item.UserPassword,
+                                    };
+                                }
+                            }
+                            string apiUrl1 = BaseUrl1 + "/" + requestData1.UserId;
+                            string jsonData = JsonConvert.SerializeObject(requestData1);
+                            HttpContent content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                            var response1 = await httpClient.PutAsync(apiUrl1, content);
+                            if (response1.IsSuccessStatusCode)
+                            {
+                                MessageBox.Show("Staff Details Updated Successfully", "Saved Successfull", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                GetStaffDetails();
+                                resetsearchboxes();
+                                ResetAll();
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
             }
         }
 
-        private void RemoveStaffbtn_Click(object sender, EventArgs e)
+        private async void RemoveStaffbtn_Click(object sender, EventArgs e)
         {
+            bool check_remove = false;
             if (isvalid())
             {
-                SqlConnection con = new SqlConnection(constr);
-                SqlCommand cmd = new SqlCommand("Delete From StaffTable Where StaffID = @staffid", con);
-
-                cmd.CommandType = CommandType.Text;
-                cmd.Parameters.AddWithValue("@staffid", StaffIDBox.Text);
-
-                con.Open();
-                cmd.ExecuteNonQuery();
-                con.Close();
-
-                MessageBox.Show("Staff Reocrd Deleted Successfully", "Delete Successfull", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                GetStaffDetails();
-                resetsearchboxes();
-                ResetAll();
+                try
+                {
+                    string apiUrl = BaseUrl + "/" + Int32.Parse(StaffIDBox.Text);
+                    var response = await httpClient.DeleteAsync(apiUrl);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        check_remove = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                if (check_remove)
+                {
+                    try
+                    {
+                        string apiUrl = BaseUrl1;
+                        var response = await httpClient.GetAsync(apiUrl);
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var responseData = await response.Content.ReadAsStringAsync();
+                            var data = JsonConvert.DeserializeObject<List<myData1>>(responseData);
+                            string emailchange;
+                            int idchange = -1;
+                            foreach (var item in data)
+                            {
+                                if (StaffEmailID.Text == item.UserEmailID)
+                                {
+                                    emailchange = item.UserEmailID;
+                                    idchange = item.UserId;
+                                }
+                            }
+                            string apiUrl1 = BaseUrl1 + "/" + idchange;
+                            var response1 = await httpClient.DeleteAsync(apiUrl1);
+                            if (response1.IsSuccessStatusCode)
+                            {
+                                MessageBox.Show("Staff Reocrd Deleted Successfully", "Delete Successfull", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                GetStaffDetails();
+                                resetsearchboxes();
+                                ResetAll();
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
             }
         }
-        private void GetStaffDetails()
+        private async void GetStaffDetails()
         {
-
-            SqlConnection con = new SqlConnection(constr);
-            SqlCommand cmd = new SqlCommand("Select * from StaffTable", con);
-
-            con.Open();
-            SqlDataReader sdr = cmd.ExecuteReader();
-
-            DataTable dtstaff = new DataTable();
-            dtstaff.Load(sdr);
-            con.Close();
-            StaffDataGridView.DataSource = dtstaff;
-
-            decimal Total = 0;
-
-            for (int i = 0; i < StaffDataGridView.Rows.Count; i++)
+            if (usertype == "Admin" || usertype == "Trainer")
             {
-                Total += Convert.ToDecimal(StaffDataGridView.Rows[i].Cells["Salary"].Value);
+                StaffAddressBox.Multiline = true;
+                StaffAddressBox.UseSystemPasswordChar = false;
+                salarybox.UseSystemPasswordChar = false;
+                StaffIdentityProof.UseSystemPasswordChar = false;
             }
-            totallabel.Text = Total.ToString();
-
-
-            string sql = "Select * from StaffTable";
-
-            con.Open();
-            DataSet ds = new DataSet();
-            SqlDataAdapter da = new SqlDataAdapter(sql, con);
-            da.Fill(ds);
-            SqlCommandBuilder builder = new SqlCommandBuilder(da);
-            StaffDataGridView.DataSource = ds.Tables[0];
-
-            totalmemberslabel.Text = ds.Tables[0].Rows.Count.ToString();
+            if (usertype == "User")
+            {
+                StaffAddressBox.Multiline = false;
+                StaffAddressBox.UseSystemPasswordChar = true;
+                salarybox.UseSystemPasswordChar = true;
+                StaffIdentityProof.UseSystemPasswordChar = true;
+            }
+            try
+            {
+                var response = await httpClient.GetAsync(BaseUrl);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseData = await response.Content.ReadAsStringAsync();
+                    var data = JsonConvert.DeserializeObject<List<myData>>(responseData);
+                    DataTable dataTable = new DataTable();
+                    dataTable.Columns.Add("StaffID", typeof(int));
+                    dataTable.Columns.Add("StaffName", typeof(string));
+                    dataTable.Columns.Add("FatherName", typeof(string));
+                    dataTable.Columns.Add("Gender", typeof(string));
+                    dataTable.Columns.Add("Age", typeof(int));
+                    dataTable.Columns.Add("PhoneNo", typeof(string));
+                    dataTable.Columns.Add("EmailID", typeof(string));
+                    dataTable.Columns.Add("Address", typeof(string));
+                    dataTable.Columns.Add("JoiningDate", typeof(DateTime));
+                    dataTable.Columns.Add("StaffDesignation", typeof(string));
+                    dataTable.Columns.Add("Salary", typeof(int));
+                    dataTable.Columns.Add("ShiftTime", typeof(string));
+                    dataTable.Columns.Add("IDType", typeof(string));
+                    dataTable.Columns.Add("IDProof", typeof(string));
+                    dataTable.Columns.Add("Photo", typeof(byte[]));
+                    decimal Total = 0;
+                    foreach (var item in data)
+                    {
+                        DataRow row = dataTable.NewRow();
+                        row["StaffID"] = item.staffid;
+                        row["StaffName"] = item.staffname;
+                        row["FatherName"] = item.fathername;
+                        row["Gender"] = item.gender;
+                        row["Age"] = item.age;
+                        row["PhoneNo"] = item.phoneNo;
+                        row["EmailID"] = item.Emailid;
+                        row["Address"] = item.Address;
+                        row["JoiningDate"] = item.joiningDate;
+                        row["StaffDesignation"] = item.staffdesignation;
+                        row["Salary"] = item.salary;
+                        row["ShiftTime"] = item.shifttime;
+                        row["IDType"] = item.IDtype;
+                        row["IDProof"] = item.IDProof;
+                        row["Photo"] = item.photo;
+                        dataTable.Rows.Add(row);
+                        Total += Convert.ToDecimal(item.salary);
+                    }
+                    totallabel.Text = "$" + Total.ToString();
+                    totalmemberslabel.Text = data.Count.ToString();
+                    StaffDataGridView.DataSource = dataTable;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void StaffDataGridView_CellClick(object sender, DataGridViewCellEventArgs e)

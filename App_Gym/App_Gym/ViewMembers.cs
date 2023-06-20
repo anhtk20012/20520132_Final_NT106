@@ -1,4 +1,5 @@
 ﻿using App_Gym.Properties;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -7,74 +8,210 @@ using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace App_Gym
 {
     public partial class ViewMembers : UserControl
     {
+        class myData
+        {
+            public int memberid { get; set; }
+            public string membername { get; set; }
+            public string fathername { get; set; }
+            public string gender { get; set; }
+            public int age { get; set; }
+            public string phoneNo { get; set; }
+            public string Emailid { get; set; }
+            public string Address { get; set; }
+            public DateTime joiningDate { get; set; }
+            public DateTime renewaldate { get; set; }
+            public string membershiptype { get; set; }
+            public int feepaid { get; set; }
+            public string timings { get; set; }
+            public byte[] photo { get; set; }
+        }
+        class myData1
+        {
+            public int UserId { get; set; }
+            public string UserType { get; set; }
+            public string UserName { get; set; }
+            public string UserEmailID { get; set; }
+            public string UserPassword { get; set; }
+        }
+        private const string BaseUrl = "https://localhost:7046/api/MemberTables";
+        private const string BaseUrl1 = "https://localhost:7046/api/Accounts";
+        string usertype = LoginPage.usertype;
+        string username = LoginPage.User;
+        string useremail = LoginPage.Email;
+        int userid = LoginPage.id;
+        private HttpClient httpClient;
         public ViewMembers()
         {
             InitializeComponent();
+            httpClient = new HttpClient();
         }
 
-        string constr = @"Data Source=LATRONGANH\SQLEXPRESS;Initial Catalog=GMSDataBase;Integrated Security=True";
-
-        private void removebtn_Click(object sender, EventArgs e)
+        
+        private async void removebtn_Click(object sender, EventArgs e)
         {
+            bool check_remove = false;
             if (isValid())
             {
-                SqlConnection con = new SqlConnection(constr);
-                SqlCommand cmd = new SqlCommand("Delete From MemberTable Where MemberID = @memberid", con);
-
-                cmd.CommandType = CommandType.Text;
-                cmd.Parameters.AddWithValue("@memberid", MemberID.Text);
-
-                con.Open();
-                cmd.ExecuteNonQuery();
-                con.Close();
-
-                MessageBox.Show("Member Reocrd Deleted Successfully", "Delete Successfull", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                clear();
-                resetsearchboxes();
-                GetMembersData();
+                try
+                {
+                    string apiUrl = BaseUrl + "/" + Int32.Parse(MemberID.Text);
+                    var response = await httpClient.DeleteAsync(apiUrl);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        check_remove = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                if (check_remove)
+                {
+                    try
+                    {
+                        string apiUrl = BaseUrl1;
+                        var response = await httpClient.GetAsync(apiUrl);
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var responseData = await response.Content.ReadAsStringAsync();
+                            var data = JsonConvert.DeserializeObject<List<myData1>>(responseData);
+                            string emailchange;
+                            int idchange = -1;
+                            foreach (var item in data)
+                            {
+                                if (EmailID.Text == item.UserEmailID)
+                                {
+                                    emailchange = item.UserEmailID;
+                                    idchange = item.UserId;
+                                }
+                            }
+                            string apiUrl1 = BaseUrl1 + "/" + idchange;
+                            var response1 = await httpClient.DeleteAsync(apiUrl1);
+                            if (response1.IsSuccessStatusCode)
+                            {
+                                MessageBox.Show("Member Reocrd Deleted Successfully", "Delete Successfull", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                clear();
+                                resetsearchboxes();
+                                GetMembersData();
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
             }
         }
 
-        private void updatebtn_Click(object sender, EventArgs e)
+        private async void updatebtn_Click(object sender, EventArgs e)
         {
             if (isValid())
             {
-                SqlConnection con = new SqlConnection(constr);
-                SqlCommand cmd = new SqlCommand("Update MemberTable set Membername = @membername, FatherName = @fathername, Gender = @gender, Age = @age, PhoneNo = @phoneNo, EmailID = @Emailid, Address = @Address, JoiningDate = @joiningDate, RenewalDate = @renewaldate, MemberShipType = @membershiptype, FeePaid = @feepaid, Timings = @timings, Photo = @photo Where MemberID = @memberid", con);
+                bool check_update = false;
+                string maillchange = "";
+                try
+                {
+                    string apiUrl = BaseUrl + "/" + MemberID.Text;
+                    var response = await httpClient.GetAsync(apiUrl);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var responseData = await response.Content.ReadAsStringAsync();
+                        var data = JsonConvert.DeserializeObject<myData>(responseData);
+                        maillchange = data.Emailid;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                var requestData = new myData()
+                {
+                    memberid = Int32.Parse(MemberID.Text),
+                    membername = MemberName.Text,
+                    fathername = FatherName.Text,
+                    gender = genderbox.Text,
+                    age = Int32.Parse(Age.Text),
+                    phoneNo = PhoneNo.Text,
+                    Emailid = EmailID.Text,
+                    Address = AddressBox.Text,
+                    joiningDate = todaysDatepicker.Value,
+                    renewaldate = renewalDatepicker.Value,
+                    membershiptype = Membershipbox.Text,
+                    feepaid = Int32.Parse(Feebox.Text),
+                    timings = GymTimingBox.Text,
+                    photo = savephoto()
+                };
+                try
+                {
+                    string apiUrl = BaseUrl + "/" + MemberID.Text;
+                    string jsonData = JsonConvert.SerializeObject(requestData);
+                    HttpContent content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                    var response = await httpClient.PutAsync(apiUrl, content);
 
-                cmd.CommandType = CommandType.Text;
-                cmd.Parameters.AddWithValue("@membername", MemberName.Text);
-                cmd.Parameters.AddWithValue("@fathername", FatherName.Text);
-                cmd.Parameters.AddWithValue("@gender", genderbox.Text);
-                cmd.Parameters.AddWithValue("@age", Age.Text);
-                cmd.Parameters.AddWithValue("@phoneNo", PhoneNo.Text);
-                cmd.Parameters.AddWithValue("@Emailid", EmailID.Text);
-                cmd.Parameters.AddWithValue("@Address", AddressBox.Text);
-                cmd.Parameters.AddWithValue("@joiningDate", todaysDatepicker.Value);
-                cmd.Parameters.AddWithValue("@renewaldate", renewalDatepicker.Value);
-                cmd.Parameters.AddWithValue("@membershiptype", Membershipbox.Text);
-                cmd.Parameters.AddWithValue("@feepaid", Feebox.Text);
-                cmd.Parameters.AddWithValue("@timings", GymTimingBox.Text);
-                cmd.Parameters.AddWithValue("@photo", savephoto());
-                cmd.Parameters.AddWithValue("@memberid", MemberID.Text);
-
-                con.Open();
-                cmd.ExecuteNonQuery();
-                con.Close();
-
-                MessageBox.Show("Member Details Updated Successfully", "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                resetsearchboxes();
-                clear();
-                GetMembersData();
+                    if (response.IsSuccessStatusCode)
+                    {
+                        check_update = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                if (check_update)
+                {
+                    try
+                    {
+                        string apiUrl = BaseUrl1;
+                        var response = await httpClient.GetAsync(apiUrl);
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var responseData = await response.Content.ReadAsStringAsync();
+                            var data = JsonConvert.DeserializeObject <List<myData1>>(responseData);
+                            myData1 requestData1 = null;
+                            foreach (var item in data)
+                            {
+                                if (maillchange == item.UserEmailID && "User" == item.UserType)
+                                {
+                                    requestData1 = new myData1()
+                                    {
+                                        UserId = item.UserId,
+                                        UserType = item.UserType,
+                                        UserName = item.UserName,
+                                        UserEmailID = EmailID.Text,
+                                        UserPassword = item.UserPassword,
+                                    };
+                                }    
+                            }
+                            string apiUrl1 = BaseUrl1 + "/" + requestData1.UserId;
+                            string jsonData = JsonConvert.SerializeObject(requestData1);
+                            HttpContent content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                            var response1 = await httpClient.PutAsync(apiUrl1, content);
+                            if (response1.IsSuccessStatusCode)
+                            {
+                                MessageBox.Show("Member Details Updated Successfully", "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                resetsearchboxes();
+                                clear();
+                                GetMembersData();
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
             }
         }
 
@@ -85,7 +222,7 @@ namespace App_Gym
             resetsearchboxes();
         }
 
-        private void SearchByPhoneBtn_Click(object sender, EventArgs e)
+        private async void SearchByPhoneBtn_Click(object sender, EventArgs e)
         {
             if (SearchByPhoneTextbox.Text == "Search by PhoneNo" || SearchByPhoneTextbox.Text == string.Empty)
             {
@@ -93,20 +230,61 @@ namespace App_Gym
             }
             else
             {
-                SqlConnection con = new SqlConnection(constr);
-                SqlCommand cmd = new SqlCommand("Select * from MemberTable Where PhoneNo LIKE '%" + SearchByPhoneTextbox.Text + "%'", con);
-
-                con.Open();
-                SqlDataReader sdr = cmd.ExecuteReader();
-
-                DataTable dtmember = new DataTable();
-                dtmember.Load(sdr);
-                con.Close();
-                MembersDataGridView.DataSource = dtmember;
+                try
+                {
+                    var response = await httpClient.GetAsync(BaseUrl);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var responseData = await response.Content.ReadAsStringAsync();
+                        var data = JsonConvert.DeserializeObject<List<myData>>(responseData);
+                        DataTable dataTable = new DataTable();
+                        dataTable.Columns.Add("MemberID", typeof(int));
+                        dataTable.Columns.Add("Membername", typeof(string));
+                        dataTable.Columns.Add("FatherName", typeof(string));
+                        dataTable.Columns.Add("Gender", typeof(string));
+                        dataTable.Columns.Add("Age", typeof(int));
+                        dataTable.Columns.Add("PhoneNo", typeof(string));
+                        dataTable.Columns.Add("EmailID", typeof(string));
+                        dataTable.Columns.Add("Address", typeof(string));
+                        dataTable.Columns.Add("JoiningDate", typeof(DateTime));
+                        dataTable.Columns.Add("RenewalDate", typeof(DateTime));
+                        dataTable.Columns.Add("MemberShipType", typeof(string));
+                        dataTable.Columns.Add("FeePaid", typeof(int));
+                        dataTable.Columns.Add("Timings", typeof(string));
+                        dataTable.Columns.Add("Photo", typeof(byte[]));
+                        foreach (var item in data)
+                        {
+                            if (item.phoneNo == SearchByPhoneTextbox.Text)
+                            {
+                                DataRow row = dataTable.NewRow();
+                                row["MemberID"] = item.memberid;
+                                row["Membername"] = item.membername;
+                                row["FatherName"] = item.fathername;
+                                row["Gender"] = item.gender;
+                                row["Age"] = item.age;
+                                row["PhoneNo"] = item.phoneNo;
+                                row["EmailID"] = item.Emailid;
+                                row["Address"] = item.Address;
+                                row["JoiningDate"] = item.joiningDate;
+                                row["RenewalDate"] = item.renewaldate;
+                                row["MemberShipType"] = item.membershiptype;
+                                row["FeePaid"] = item.feepaid;
+                                row["Timings"] = item.timings;
+                                row["Photo"] = item.photo;
+                                dataTable.Rows.Add(row);
+                            }
+                        }
+                        MembersDataGridView.DataSource = dataTable;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
-        private void SearchByIdBtn_Click(object sender, EventArgs e)
+        private async void SearchByIdBtn_Click(object sender, EventArgs e)
         {
             if (SearchByIDTextbox.Text == "Search by ID" || SearchByIDTextbox.Text == string.Empty)
             {
@@ -114,16 +292,57 @@ namespace App_Gym
             }
             else
             {
-                SqlConnection con = new SqlConnection(constr);
-                SqlCommand cmd = new SqlCommand("Select * from MemberTable Where MemberID LIKE '%" + SearchByIDTextbox.Text + "%'", con);
-
-                con.Open();
-                SqlDataReader sdr = cmd.ExecuteReader();
-
-                DataTable dtmember = new DataTable();
-                dtmember.Load(sdr);
-                con.Close();
-                MembersDataGridView.DataSource = dtmember;
+                try
+                {
+                    var response = await httpClient.GetAsync(BaseUrl);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var responseData = await response.Content.ReadAsStringAsync();
+                        var data = JsonConvert.DeserializeObject<List<myData>>(responseData);
+                        DataTable dataTable = new DataTable();
+                        dataTable.Columns.Add("MemberID", typeof(int));
+                        dataTable.Columns.Add("Membername", typeof(string));
+                        dataTable.Columns.Add("FatherName", typeof(string));
+                        dataTable.Columns.Add("Gender", typeof(string));
+                        dataTable.Columns.Add("Age", typeof(int));
+                        dataTable.Columns.Add("PhoneNo", typeof(string));
+                        dataTable.Columns.Add("EmailID", typeof(string));
+                        dataTable.Columns.Add("Address", typeof(string));
+                        dataTable.Columns.Add("JoiningDate", typeof(DateTime));
+                        dataTable.Columns.Add("RenewalDate", typeof(DateTime));
+                        dataTable.Columns.Add("MemberShipType", typeof(string));
+                        dataTable.Columns.Add("FeePaid", typeof(int));
+                        dataTable.Columns.Add("Timings", typeof(string));
+                        dataTable.Columns.Add("Photo", typeof(byte[]));
+                        foreach (var item in data)
+                        {
+                            if (item.memberid == Int32.Parse(SearchByIDTextbox.Text))
+                            {
+                                DataRow row = dataTable.NewRow();
+                                row["MemberID"] = item.memberid;
+                                row["Membername"] = item.membername;
+                                row["FatherName"] = item.fathername;
+                                row["Gender"] = item.gender;
+                                row["Age"] = item.age;
+                                row["PhoneNo"] = item.phoneNo;
+                                row["EmailID"] = item.Emailid;
+                                row["Address"] = item.Address;
+                                row["JoiningDate"] = item.joiningDate;
+                                row["RenewalDate"] = item.renewaldate;
+                                row["MemberShipType"] = item.membershiptype;
+                                row["FeePaid"] = item.feepaid;
+                                row["Timings"] = item.timings;
+                                row["Photo"] = item.photo;
+                                dataTable.Rows.Add(row);
+                            }
+                        }
+                        MembersDataGridView.DataSource = dataTable;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
@@ -384,7 +603,7 @@ namespace App_Gym
                 renewalDatepicker.Value = todaysDatepicker.Value.AddDays(365);
             }
         }
-        string usertype = LoginPage.usertype;
+
 
         private void ViewMembers_Load(object sender, EventArgs e)
         {
@@ -411,40 +630,121 @@ namespace App_Gym
             MembersDataGridView.ColumnHeadersDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#2F363F");
             MembersDataGridView.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
         }
-        private void GetMembersData()
+        private async void GetMembersData()
         {
-            SqlConnection con = new SqlConnection(constr);
-            SqlCommand cmd = new SqlCommand("Select * from MemberTable", con);
-
-            con.Open();
-            SqlDataReader sdr = cmd.ExecuteReader();
-
-            DataTable dtclients = new DataTable();
-            dtclients.Load(sdr);
-            con.Close();
-            MembersDataGridView.DataSource = dtclients;
-
-            decimal Total = 0;
-
-            for (int i = 0; i < MembersDataGridView.Rows.Count; i++)
+            if (usertype == "Admin" || usertype == "Trainer")
             {
-                Total += Convert.ToDecimal(MembersDataGridView.Rows[i].Cells["FeePaid"].Value);
-            }
-
-
-            totallabel.Text = Total.ToString();
-
-
-            string sql = "Select * from MemberTable";
-
-            con.Open();
-            DataSet ds = new DataSet();
-            SqlDataAdapter da = new SqlDataAdapter(sql, con);
-            da.Fill(ds);
-            SqlCommandBuilder builder = new SqlCommandBuilder(da);
-            MembersDataGridView.DataSource = ds.Tables[0];
-
-            totalmemberslabel.Text = ds.Tables[0].Rows.Count.ToString();
+                try
+                {
+                    var response = await httpClient.GetAsync(BaseUrl);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var responseData = await response.Content.ReadAsStringAsync();
+                        var data = JsonConvert.DeserializeObject<List<myData>>(responseData);
+                        DataTable dataTable = new DataTable();
+                        dataTable.Columns.Add("MemberID", typeof(int));
+                        dataTable.Columns.Add("Membername", typeof(string));
+                        dataTable.Columns.Add("FatherName", typeof(string));
+                        dataTable.Columns.Add("Gender", typeof(string));
+                        dataTable.Columns.Add("Age", typeof(int));
+                        dataTable.Columns.Add("PhoneNo", typeof(string));
+                        dataTable.Columns.Add("EmailID", typeof(string));
+                        dataTable.Columns.Add("Address", typeof(string));
+                        dataTable.Columns.Add("JoiningDate", typeof(DateTime));
+                        dataTable.Columns.Add("RenewalDate", typeof(DateTime));
+                        dataTable.Columns.Add("MemberShipType", typeof(string));
+                        dataTable.Columns.Add("FeePaid", typeof(int));
+                        dataTable.Columns.Add("Timings", typeof(string));
+                        dataTable.Columns.Add("Photo", typeof(byte[]));
+                        decimal Total = 0;
+                        foreach (var item in data)
+                        {
+                            DataRow row = dataTable.NewRow();
+                            row["MemberID"] = item.memberid;
+                            row["Membername"] = item.membername;
+                            row["FatherName"] = item.fathername;
+                            row["Gender"] = item.gender;
+                            row["Age"] = item.age;
+                            row["PhoneNo"] = item.phoneNo;
+                            row["EmailID"] = item.Emailid;
+                            row["Address"] = item.Address;
+                            row["JoiningDate"] = item.joiningDate;
+                            row["RenewalDate"] = item.renewaldate;
+                            row["MemberShipType"] = item.membershiptype;
+                            row["FeePaid"] = item.feepaid;
+                            row["Timings"] = item.timings;
+                            row["Photo"] = item.photo;
+                            dataTable.Rows.Add(row);
+                            Total += Convert.ToDecimal(item.feepaid);
+                        }
+                        totallabel.Text = "$" + Total.ToString();
+                        totalmemberslabel.Text = data.Count.ToString();
+                        MembersDataGridView.DataSource = dataTable;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }    
+            if (usertype == "User")
+            {
+                try
+                {
+                    var response = await httpClient.GetAsync(BaseUrl);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var responseData = await response.Content.ReadAsStringAsync();
+                        var data = JsonConvert.DeserializeObject<List<myData>>(responseData);
+                        DataTable dataTable = new DataTable();
+                        dataTable.Columns.Add("MemberID", typeof(int));
+                        dataTable.Columns.Add("Membername", typeof(string));
+                        dataTable.Columns.Add("FatherName", typeof(string));
+                        dataTable.Columns.Add("Gender", typeof(string));
+                        dataTable.Columns.Add("Age", typeof(int));
+                        dataTable.Columns.Add("PhoneNo", typeof(string));
+                        dataTable.Columns.Add("EmailID", typeof(string));
+                        dataTable.Columns.Add("Address", typeof(string));
+                        dataTable.Columns.Add("JoiningDate", typeof(DateTime));
+                        dataTable.Columns.Add("RenewalDate", typeof(DateTime));
+                        dataTable.Columns.Add("MemberShipType", typeof(string));
+                        dataTable.Columns.Add("FeePaid", typeof(int));
+                        dataTable.Columns.Add("Timings", typeof(string));
+                        dataTable.Columns.Add("Photo", typeof(byte[]));
+                        decimal Total = 0;
+                        foreach (var item in data)
+                        {
+                            if (item.Emailid == useremail)
+                            {
+                                DataRow row = dataTable.NewRow();
+                                row["MemberID"] = item.memberid;
+                                row["Membername"] = item.membername;
+                                row["FatherName"] = item.fathername;
+                                row["Gender"] = item.gender;
+                                row["Age"] = item.age;
+                                row["PhoneNo"] = item.phoneNo;
+                                row["EmailID"] = item.Emailid;
+                                row["Address"] = item.Address;
+                                row["JoiningDate"] = item.joiningDate;
+                                row["RenewalDate"] = item.renewaldate;
+                                row["MemberShipType"] = item.membershiptype;
+                                row["FeePaid"] = item.feepaid;
+                                row["Timings"] = item.timings;
+                                row["Photo"] = item.photo;
+                                dataTable.Rows.Add(row);
+                                Total += Convert.ToDecimal(item.feepaid);
+                            }    
+                        }
+                        totallabel.Text = "$" + Total.ToString();
+                        totalmemberslabel.Text = "1";
+                        MembersDataGridView.DataSource = dataTable;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }    
         }
 
         private void MemberName_TextChanged(object sender, EventArgs e)

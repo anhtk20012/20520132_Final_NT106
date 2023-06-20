@@ -13,69 +13,132 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using App_Gym.Properties;
+using System.Net.Http;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Xml.Linq;
+using Newtonsoft.Json;
 
 namespace App_Gym
 {
     public partial class AddMemberControl : UserControl
     {
+        class myData
+        {
+            public int memberid { get; set; }
+            public string membername { get; set; }
+            public string fathername { get; set; }
+            public string gender { get; set; }
+            public int age { get; set; }
+            public string phoneNo { get; set; }
+            public string Emailid { get; set; }
+            public string Address { get; set; }
+            public DateTime joiningDate { get; set; }
+            public DateTime renewaldate { get; set; }
+            public string membershiptype { get; set; }
+            public int feepaid { get; set; }
+            public string timings { get; set; }
+            public byte[] photo { get; set; }
+        }
+
+        class myData1
+        {
+            public int UserId { get; set; }
+            public string UserType { get; set; }
+            public string UserName { get; set; }
+            public string UserEmailID { get; set; }
+            public string UserPassword { get; set; }
+        }
+
+        class myData2
+        {
+            public string GymEmailID { get; set; }
+            public string Password { get; set; }
+            public string GymName { get; set; }
+        }
+        private bool checkphone;
+        private bool checkmail;
+        private const string BaseUrl = "https://localhost:7046/api/MemberTables";
+        private const string BaseUrl1 = "https://localhost:7046/api/Accounts";
+        private const string BaseUrl2 = "https://localhost:7046/api/GymDetails";
+        private HttpClient httpClient;
         public AddMemberControl()
         {
             InitializeComponent();
+            httpClient = new HttpClient();
         }
-
-        string constr = @"Data Source=LATRONGANH\SQLEXPRESS;Initial Catalog=GMSDataBase;Integrated Security=True";
-        
 
         private void AddMemberControl_Load(object sender, EventArgs e)
         {
-            SqlConnection con = new SqlConnection(constr);
             getemailinfo();
         }
 
-        private void Addmemberbutton_Click(object sender, EventArgs e)
+        private async void Addmemberbutton_Click(object sender, EventArgs e)
         {
             if (isValid())
             {
+                bool create_account = false;
+                var requestData = new myData()
+                {
+                    memberid = 0,
+                    membername = fullnametxtbox.Text,
+                    fathername = fathernametxtbox.Text,
+                    gender = genderbox.Text,
+                    age = Int32.Parse(dobbox.Text),
+                    phoneNo = phonebox.Text,
+                    Emailid = Emailbox.Text,
+                    Address = AddressBox.Text,
+                    joiningDate = todaysDatepicker.Value,
+                    renewaldate = renewalDatepicker.Value,
+                    membershiptype = Membershipbox.Text,
+                    feepaid = Int32.Parse(feebox.Text),
+                    timings = GymTimingBox.Text,
+                    photo = savephoto()
+                };
                 try
                 {
-                    SqlConnection con = new SqlConnection(constr);
-                    SqlCommand cmd = new SqlCommand("Insert into MemberTable Values(@Membername, @fathername, @gender, @age, @phoneNo, @Emailid, @Address, @joiningDate, @renewaldate, @membershiptype, @feepaid, @timings, @photo)", con);
-                    
-                    cmd.CommandType = CommandType.Text;
-                    cmd.Parameters.AddWithValue("@Membername", fullnametxtbox.Text);
-                    cmd.Parameters.AddWithValue("@fathername", fathernametxtbox.Text);
-                    cmd.Parameters.AddWithValue("@gender", genderbox.Text);
-                    cmd.Parameters.AddWithValue("@age", dobbox.Text);
-                    cmd.Parameters.AddWithValue("@phoneNo", phonebox.Text);
-                    cmd.Parameters.AddWithValue("@Emailid", Emailbox.Text);
-                    cmd.Parameters.AddWithValue("@Address", AddressBox.Text);
-                    cmd.Parameters.AddWithValue("@joiningDate", todaysDatepicker.Value);
-                    cmd.Parameters.AddWithValue("@renewaldate", renewalDatepicker.Value);
-                    cmd.Parameters.AddWithValue("@membershiptype", Membershipbox.Text);
-                    cmd.Parameters.AddWithValue("@feepaid", feebox.Text);
-                    cmd.Parameters.AddWithValue("@timings", GymTimingBox.Text);
-                    cmd.Parameters.AddWithValue("@photo", savephoto());
-                    
-                    SqlCommand create_cmd = new SqlCommand("Insert into Accounts Values(@UserType, @UserName, @UserEmailID, @UserPassword)", con);
+                    string apiUrl = BaseUrl;
+                    string jsonData = JsonConvert.SerializeObject(requestData);
+                    HttpContent content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                    var response = await httpClient.PostAsync(apiUrl, content);
 
-                    create_cmd.CommandType = CommandType.Text;
-                    create_cmd.Parameters.AddWithValue("@UserType", "User");
-                    create_cmd.Parameters.AddWithValue("@UserName", Emailbox.Text);
-                    create_cmd.Parameters.AddWithValue("@UserEmailID", Emailbox.Text);
-                    create_cmd.Parameters.AddWithValue("@UserPassword", "gymapp1234");
-
-                    con.Open();
-                    cmd.ExecuteNonQuery();
-                    create_cmd.ExecuteNonQuery();
-                    con.Close();
-                    SendGreetings();
-                    MessageBox.Show("user info saved successfully");
-                    resetboxes();
+                    if (response.IsSuccessStatusCode)
+                    {
+                        MessageBox.Show("successfully added");
+                        create_account = true;
+                    }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message);
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+                if (create_account == true)
+                {
+                    var requestData1 = new myData1()
+                    {
+                        UserId = 0,
+                        UserType = "User",
+                        UserName = Emailbox.Text,
+                        UserEmailID = Emailbox.Text,
+                        UserPassword = "gymapp1234",
+                    };
+                    try
+                    {
+                        string apiUrl = BaseUrl1;
+                        string jsonData = JsonConvert.SerializeObject(requestData1);
+                        HttpContent content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                        var response = await httpClient.PostAsync(apiUrl, content);
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            SendGreetings();
+                            resetboxes();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }    
             }
         }
         private void SendGreetings()
@@ -149,22 +212,29 @@ namespace App_Gym
         string emailid;
         string password;
         string gymname;
+        
 
-        private void getemailinfo()
+        private async void getemailinfo()
         {
-            SqlConnection con = new SqlConnection(constr);
-
-            SqlCommand cmd = new SqlCommand("Select GymEmailID, Password, GymName from GymDetails", con);
-
-            con.Open();
-            SqlDataReader sdr = cmd.ExecuteReader();
-            while (sdr.Read())
+            try
             {
-                emailid = sdr.GetValue(0).ToString();
-                password = sdr.GetValue(1).ToString();
-                gymname = sdr.GetValue(2).ToString();
+                var response = await httpClient.GetAsync(BaseUrl2);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseData = await response.Content.ReadAsStringAsync();
+                    var data = JsonConvert.DeserializeObject<myData2[]>(responseData);
+                    foreach (var item in data)
+                    {
+                        emailid = item.GymEmailID;
+                        password = item.Password;
+                        gymname = item.GymName;
+                    }    
+                }
             }
-            con.Close();
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void clearallbtn_Click(object sender, EventArgs e)
@@ -216,7 +286,68 @@ namespace App_Gym
             Control ctrl = (Control)sender;
             ctrl.BackColor = Color.White;
         }
-
+        
+        private async void check_phone()
+        {
+            checkphone = true;
+            try
+            {
+                var response = await httpClient.GetAsync(BaseUrl);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseData = await response.Content.ReadAsStringAsync();
+                    var data = JsonConvert.DeserializeObject<List<myData>>(responseData);
+                    foreach (var item in data)
+                    {
+                        if (item.phoneNo == phonebox.Text)
+                        {
+                            MessageBox.Show("Phone Number = " + phonebox.Text + " found in records", "Duplicate Record Found", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                            Emailbox.BackColor = Color.LightPink;
+                            Emailbox.Focus();
+                            checkphone = false;
+                            return;
+                        }    
+                    }
+                }
+                phonebox.BackColor = Color.White;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                checkphone = false;
+            }           
+        }
+        
+        private async void check_mail()
+        {
+            checkmail = true;
+            try
+            {
+                var response = await httpClient.GetAsync(BaseUrl);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseData = await response.Content.ReadAsStringAsync();
+                    var data = JsonConvert.DeserializeObject<List<myData>>(responseData);
+                    foreach (var item in data)
+                    {
+                        if (item.Emailid == Emailbox.Text)
+                        {
+                            MessageBox.Show("Email ID = " + Emailbox.Text + " found in records", "Duplicate Record Found", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                            Emailbox.BackColor = Color.LightPink;
+                            Emailbox.Focus();
+                            checkmail = false;
+                            return;
+                        }
+                    }
+                }
+                Emailbox.BackColor = Color.White;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                checkmail = false;
+            }
+        }
         private bool isValid()
         {
             string mailpattern = "^([0-9a-zA-Z]([-\\.\\w]*[0-9a-zA-Z])*@([0-9a-zA-Z][-\\w]*[0-9a-zA-Z]\\.)+[a-zA-Z]{2,9})$";
@@ -276,23 +407,8 @@ namespace App_Gym
             }
             else
             {
-                SqlConnection con = new SqlConnection(constr);
-                SqlCommand cmd = new SqlCommand("Select * from MemberTable Where PhoneNo = '" + phonebox.Text + "'", con);
-                SqlDataAdapter sda = new SqlDataAdapter(cmd);
-                DataSet ds = new DataSet();
-                sda.Fill(ds);
-                int i = ds.Tables[0].Rows.Count;
-                if (i > 0)
-                {
-                    MessageBox.Show("Phone Number = " + phonebox.Text + " found in records", "Duplicate Record Found", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                    Emailbox.BackColor = Color.LightPink;
-                    Emailbox.Focus();
-                    return false;
-                }
-                else
-                {
-                    phonebox.BackColor = Color.White;
-                }    
+                check_phone();
+                if (checkphone == false) return false;
             }
 
             if (Emailbox.Text == "")
@@ -311,23 +427,8 @@ namespace App_Gym
             }
             else
             {
-                SqlConnection con = new SqlConnection(constr);
-                SqlCommand cmd = new SqlCommand("Select * from MemberTable Where EmailID = '" + Emailbox.Text + "'", con);
-                SqlDataAdapter sda = new SqlDataAdapter(cmd);
-                DataSet ds = new DataSet();
-                sda.Fill(ds);
-                int i = ds.Tables[0].Rows.Count;
-                if (i > 0)
-                {
-                    MessageBox.Show("Email ID = " + Emailbox.Text + " found in records", "Duplicate Record Found", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                    Emailbox.BackColor = Color.LightPink;
-                    Emailbox.Focus();
-                    return false;
-                }
-                else
-                {
-                    Emailbox.BackColor = Color.White;
-                }    
+                check_mail();
+                if (checkmail == false) return checkmail;
             }
 
             if (AddressBox.Text == "")

@@ -10,14 +10,40 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Net.Http;
+using System.Net.Sockets;
+using Newtonsoft.Json;
+using System.Threading;
 
 namespace App_Gym
 {
+
     public partial class ForgotPasswordPage : Form
     {
+        class myData
+        {
+            public int UserId { get; set; }
+            public string UserType { get; set; }
+            public string UserName { get; set; }
+            public string UserEmailID { get; set; }
+            public string UserPassword { get; set; }
+        }
+        class myData_send
+        {
+            public string GymEmailID { get; set; }
+            public string Password { get; set; }
+            public string GymName { get; set; }
+        }
+
+        private const string BaseUrl = "https://localhost:7046/api/Accounts";
+        private const string BaseUrl_send = "https://localhost:7046/api/GymDetails";
+
+        private HttpClient httpClient;
         public ForgotPasswordPage()
         {
             InitializeComponent();
+            httpClient = new HttpClient();
+
         }
 
         public const int WM_NCLBUTTONDOWN = 0xA1;
@@ -27,8 +53,6 @@ namespace App_Gym
         public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         public static extern bool ReleaseCapture();
-
-        string constr = @"Data Source=LATRONGANH\SQLEXPRESS;Initial Catalog=GMSDataBase;Integrated Security=True";
 
         private void closebox_Click(object sender, EventArgs e)
         {
@@ -47,41 +71,70 @@ namespace App_Gym
         string gymname;
         string OTPCode;
 
-        private void getgymdetails()
+        private async void getgymdetails()
         {
-            SqlConnection con = new SqlConnection(constr);
-
-            SqlCommand cmd = new SqlCommand("Select GymEmailID, Password, GymName from GymDetails", con);
-
-            con.Open();
-            SqlDataReader sdr = cmd.ExecuteReader();
-            while (sdr.Read())
+            try
             {
-                emailid = sdr.GetValue(0).ToString();
-                password = sdr.GetValue(1).ToString();
-                gymname = sdr.GetValue(2).ToString();
+                var response = await httpClient.GetAsync(BaseUrl_send);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseData = await response.Content.ReadAsStringAsync();
+                    var data = JsonConvert.DeserializeObject<myData_send[]>(responseData);
+                    foreach (var item in data)
+                    {
+                        emailid = item.GymEmailID;
+                        password = item.Password;
+                        gymname = item.GymName;
+                    }
+                }
             }
-            con.Close();
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
-        public static string to; 
+        public static string to;
         public static string Type;
-
-        private void SendOtpBtn_Click(object sender, EventArgs e)
+        private int checki = -1;
+        private void check_i()
         {
-            SqlConnection con = new SqlConnection(constr);
-            to = EmailTextbox.Text;
-            Random rand = new Random();
-            OTPCode = (rand.Next(999999)).ToString();
-            SqlCommand cmd = new SqlCommand("Select * from Accounts Where UserEmailID = '" + EmailTextbox.Text + "'", con);
-            SqlDataAdapter sda = new SqlDataAdapter(cmd);
-            DataSet ds = new DataSet();
-            sda.Fill(ds);
-            int i = ds.Tables[0].Rows.Count;
-            if (i > 0)
+            using (WebClient client = new WebClient())
             {
                 try
                 {
+                    string responseData = client.DownloadString(BaseUrl);
+                    var data = JsonConvert.DeserializeObject<List<myData>>(responseData);
+                    foreach (var item in data)
+                    {
+                        if (EmailTextbox.Text == item.UserEmailID)
+                        {
+                            checki = 1;
+                        }
+                    }
+                    if (checki == -1) checki = 0;
+                }
+                catch (Exception ex)
+                {
+                    checki = 0;
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+        private void SendOtpBtn_Click(object sender, EventArgs e)
+        {
+            check_i();
+            while (true)
+            {
+                if (checki == 1 || checki == 0) break;
+            }    
+            if (checki > 0)
+            {
+                try
+                {
+                    to = EmailTextbox.Text;
+                    Random rand = new Random();
+                    OTPCode = (rand.Next(999999)).ToString();
                     SmtpClient client = new SmtpClient()
                     {
                         Host = "smtp.gmail.com",

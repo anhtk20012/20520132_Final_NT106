@@ -1,21 +1,82 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml;
+using System.Xml.Linq;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace App_Gym
 {
     public partial class AdminSettings : Form
     {
+        class myData
+        {
+            public int UserId { get; set; }
+            public string UserType { get; set; }
+            public string UserName { get; set; }
+            public string UserEmailID { get; set; }
+            public string UserPassword { get; set; }
+        }
+        class myData_send
+        {
+            public string GymEmailID { get; set; }
+            public string Password { get; set; }
+            public string GymName { get; set; }
+        }
+        class myData1
+        {
+            public int memberid { get; set; }
+            public string membername { get; set; }
+            public string fathername { get; set; }
+            public string gender { get; set; }
+            public int age { get; set; }
+            public string phoneNo { get; set; }
+            public string Emailid { get; set; }
+            public string Address { get; set; }
+            public DateTime joiningDate { get; set; }
+            public DateTime renewaldate { get; set; }
+            public string membershiptype { get; set; }
+            public int feepaid { get; set; }
+            public string timings { get; set; }
+            public byte[] photo { get; set; }
+        }
+        class myData2
+        {
+            public int staffid { get; set; }
+            public string staffname { get; set; }
+            public string fathername { get; set; }
+            public string gender { get; set; }
+            public int age { get; set; }
+            public string phoneNo { get; set; }
+            public string Emailid { get; set; }
+            public string Address { get; set; }
+            public DateTime joiningDate { get; set; }
+            public string staffdesignation { get; set; }
+            public int salary { get; set; }
+            public string shifttime { get; set; }
+            public string IDtype { get; set; }
+            public string IDProof { get; set; }
+            public byte[] photo { get; set; }
+        }
+        private const string BaseUrl = "https://localhost:7046/api/Accounts";
+        private const string BaseUrl1 = "https://localhost:7046/api/MemberTables";
+        private const string BaseUrl2 = "https://localhost:7046/api/StaffTables";
+        private const string BaseUrl_send = "https://localhost:7046/api/GymDetails";
+        string useremail = LoginPage.Email;
+        private HttpClient httpClient;
         public AdminSettings()
         {
             InitializeComponent();
+            httpClient = new HttpClient();
         }
 
         public const int WM_NCLBUTTONDOWN = 0xA1;
@@ -25,8 +86,6 @@ namespace App_Gym
         public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         public static extern bool ReleaseCapture();
-
-        string constr = @"Data Source=LATRONGANH\SQLEXPRESS;Initial Catalog=GMSDataBase;Integrated Security=True";
 
         private bool IsValid()
         {
@@ -63,92 +122,276 @@ namespace App_Gym
             return true;
         }
 
-        private bool issingle()
+        private async void EditBtn_Click(object sender, EventArgs e)
         {
-            SqlConnection con = new SqlConnection(constr);
-            SqlCommand cmd = new SqlCommand("Select * from Accounts Where UserEmailID = '" + EmailIDTextBox.Text + "'", con);
-            SqlDataAdapter sda = new SqlDataAdapter(cmd);
-            DataSet ds = new DataSet();
-            sda.Fill(ds);
-            int i = ds.Tables[0].Rows.Count;
-            if (i > 0)
+            bool check_update = false;
+            string maillchange = "";
+            try
             {
-                MessageBox.Show("A Member Is Already Registerd with this Email ID");
-                return false;
+                string apiUrl = BaseUrl + "/" + textBox1.Text;
+                var response = await httpClient.GetAsync(apiUrl);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseData = await response.Content.ReadAsStringAsync();
+                    var data = JsonConvert.DeserializeObject<myData>(responseData);
+                    maillchange = data.UserEmailID;
+                }
             }
-
-            return true;
-        }
-
-        private void SaveBtn_Click(object sender, EventArgs e)
-        {
-            if (IsValid() && issingle())
+            catch (Exception ex)
             {
-                SqlConnection con = new SqlConnection(constr);
-                SqlCommand cmd = new SqlCommand("Insert into Accounts Values(@UserType, @UserName, @UserEmailID, @UserPassword)", con);
-
-                cmd.CommandType = CommandType.Text;
-                cmd.Parameters.AddWithValue("@UserType", UserTypeBox.Text);
-                cmd.Parameters.AddWithValue("@UserName", UserNameTextBox.Text);
-                cmd.Parameters.AddWithValue("@UserEmailID", EmailIDTextBox.Text);
-                cmd.Parameters.AddWithValue("@UserPassword", ConfirmPassTextBox.Text);
-
-
-                con.Open();
-                cmd.ExecuteNonQuery();
-                con.Close();
-
-                MessageBox.Show("User Added Successfully", "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                GetAccountsDetails();
-                clearall();
-
-
-
+                MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        private void EditBtn_Click(object sender, EventArgs e)
-        {
             if (IsValid())
             {
-                SqlConnection con = new SqlConnection(constr);
-                SqlCommand cmd = new SqlCommand("Update Accounts Set UserType =@UserType, UserName =@UserName, UserEmailID =@UserEmailID, UserPassword =@UserPassword Where UserId =@UserId", con);
+                var requestData = new myData()
+                {
+                    UserId = Int32.Parse(textBox1.Text),
+                    UserType = UserTypeBox.Text,
+                    UserName = UserNameTextBox.Text,
+                    UserEmailID = EmailIDTextBox.Text,
+                    UserPassword = ConfirmPassTextBox.Text,
+                };
 
-                cmd.CommandType = CommandType.Text;
-                cmd.Parameters.AddWithValue("UserId", textBox1.Text);
-                cmd.Parameters.AddWithValue("UserType", UserTypeBox.Text);
-                cmd.Parameters.AddWithValue("@UserName", UserNameTextBox.Text);
-                cmd.Parameters.AddWithValue("@UserEmailID", EmailIDTextBox.Text);
-                cmd.Parameters.AddWithValue("@UserPassword", ConfirmPassTextBox.Text);
+                try
+                {
+                    string apiUrl = BaseUrl + "/" + requestData.UserId;
+                    string jsonData = JsonConvert.SerializeObject(requestData);
+                    HttpContent content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                    var response = await httpClient.PutAsync(apiUrl, content);
 
+                    if (response.IsSuccessStatusCode)
+                    {
+                        check_update = true;
+                        if (UserTypeBox.Text == "Admin")
+                        {
+                            MessageBox.Show("Admin Updated Successfully", "Updated", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            check_update = false;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
 
-                con.Open();
-                cmd.ExecuteNonQuery();
-                con.Close();
-
-                MessageBox.Show("User Updated Successfully", "Updated", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                GetAccountsDetails();
-                clearall();
+                if (check_update)
+                {
+                    if (UserTypeBox.Text == "User")
+                        try
+                        {
+                            string apiUrl = BaseUrl1;
+                            var response = await httpClient.GetAsync(apiUrl);
+                            if (response.IsSuccessStatusCode)
+                            {
+                                var responseData = await response.Content.ReadAsStringAsync();
+                                var data = JsonConvert.DeserializeObject<List<myData1>>(responseData);
+                                myData1 requestData1 = null;
+                                foreach (var item in data)
+                                {
+                                    if (maillchange == item.Emailid)
+                                    {
+                                        requestData1 = new myData1()
+                                        {
+                                            memberid = item.memberid,
+                                            membername = item.membername,
+                                            fathername = item.fathername,
+                                            gender = item.gender,
+                                            age = item.age,
+                                            phoneNo = item.phoneNo,
+                                            Emailid = EmailIDTextBox.Text,
+                                            Address = item.Address,
+                                            joiningDate = item.joiningDate,
+                                            renewaldate = item.renewaldate,
+                                            membershiptype = item.membershiptype,
+                                            feepaid = item.feepaid,
+                                            timings = item.timings,
+                                            photo = item.photo
+                                        };
+                                    }
+                                }
+                                string apiUrl1 = BaseUrl1 + "/" + requestData1.memberid;
+                                string jsonData = JsonConvert.SerializeObject(requestData1);
+                                HttpContent content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                                var response1 = await httpClient.PutAsync(apiUrl1, content);
+                                if (response1.IsSuccessStatusCode)
+                                {
+                                    MessageBox.Show("User Updated Successfully", "Updated", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    if (UserTypeBox.Text == "Trainer")
+                    {
+                        try
+                        {
+                            string apiUrl = BaseUrl2;
+                            var response = await httpClient.GetAsync(apiUrl);
+                            if (response.IsSuccessStatusCode)
+                            {
+                                var responseData = await response.Content.ReadAsStringAsync();
+                                var data = JsonConvert.DeserializeObject<List<myData2>>(responseData);
+                                myData2 requestData1 = null;
+                                foreach (var item in data)
+                                {
+                                    if (maillchange == item.Emailid)
+                                    {
+                                        requestData1 = new myData2()
+                                        {
+                                            staffid = item.staffid,
+                                            staffname = item.staffname,
+                                            fathername = item.fathername,
+                                            gender = item.gender,
+                                            age = item.age,
+                                            phoneNo = item.phoneNo,
+                                            Emailid = EmailIDTextBox.Text,
+                                            Address = item.Address,
+                                            joiningDate = item.joiningDate,
+                                            staffdesignation = item.staffdesignation,
+                                            salary = item.salary,
+                                            shifttime = item.shifttime,
+                                            IDtype = item.IDtype,
+                                            IDProof = item.IDProof,
+                                            photo = item.photo
+                                        };
+                                    }
+                                }
+                                string apiUrl1 = BaseUrl2 + "/" + requestData1.staffid;
+                                string jsonData = JsonConvert.SerializeObject(requestData1);
+                                HttpContent content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                                var response1 = await httpClient.PutAsync(apiUrl1, content);
+                                if (response1.IsSuccessStatusCode)
+                                {
+                                    MessageBox.Show("Trainer Updated Successfully", "Updated", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                }
+                try
+                {
+                    var response = await httpClient.GetAsync(BaseUrl);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var responseData = await response.Content.ReadAsStringAsync();
+                        var data = JsonConvert.DeserializeObject<List<myData>>(responseData);
+                        GetAccountsDetails(data);
+                        clearall();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
-        private void DeleteBtn_Click(object sender, EventArgs e)
+        private async void DeleteBtn_Click(object sender, EventArgs e)
         {
+            bool check_remove = false;
             if (IsValid())
             {
-                SqlConnection con = new SqlConnection(constr);
-                SqlCommand cmd = new SqlCommand("Delete From  Accounts Where UserID = @id", con);
+                try
+                {
+                    string apiUrl = BaseUrl + "/" + Int32.Parse(textBox1.Text);
+                    var response = await httpClient.DeleteAsync(apiUrl);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        check_remove = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                if (check_remove)
+                {
+                    if (UserTypeBox.Text == "User")
+                    {
+                        try
+                        {
+                            string apiUrl = BaseUrl1;
+                            var response = await httpClient.GetAsync(apiUrl);
+                            if (response.IsSuccessStatusCode)
+                            {
+                                var responseData = await response.Content.ReadAsStringAsync();
+                                var data = JsonConvert.DeserializeObject<List<myData1>>(responseData);
+                                int idchange = -1;
+                                foreach (var item in data)
+                                {
+                                    if (item.Emailid == EmailIDTextBox.Text)
+                                    {
+                                        idchange = item.memberid;
+                                    }
+                                }
+                                string apiUrl1 = BaseUrl1 + "/" + idchange;
+                                var response1 = await httpClient.DeleteAsync(apiUrl1);
+                                if (response1.IsSuccessStatusCode)
+                                {
+                                    MessageBox.Show("User Deleted Successfully", "Deleted", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                    if (UserTypeBox.Text == "Trainer")
+                    {
+                        try
+                        {
+                            string apiUrl = BaseUrl2;
+                            var response = await httpClient.GetAsync(apiUrl);
+                            if (response.IsSuccessStatusCode)
+                            {
+                                var responseData = await response.Content.ReadAsStringAsync();
+                                var data = JsonConvert.DeserializeObject<List<myData2>>(responseData);
+                                int idchange = -1;
+                                foreach (var item in data)
+                                {
+                                    if (item.Emailid == EmailIDTextBox.Text)
+                                    {
+                                        idchange = item.staffid;
+                                    }
+                                }
+                                string apiUrl1 = BaseUrl2 + "/" + idchange;
+                                var response1 = await httpClient.DeleteAsync(apiUrl1);
+                                if (response1.IsSuccessStatusCode)
+                                {
+                                    MessageBox.Show("Trainer Deleted Successfully", "Deleted", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                }
 
-                cmd.CommandType = CommandType.Text;
-                cmd.Parameters.AddWithValue("@id", textBox1.Text);
+                try
+                {
+                    var response = await httpClient.GetAsync(BaseUrl);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var responseData = await response.Content.ReadAsStringAsync();
+                        var data = JsonConvert.DeserializeObject<List<myData>>(responseData);
 
-                con.Open();
-                cmd.ExecuteNonQuery();
-                con.Close();
-
-                MessageBox.Show("User Deleted Successfully", "Deleted", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                GetAccountsDetails();
-                clearall();
+                        GetAccountsDetails(data);
+                        clearall();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
             else
             {
@@ -157,7 +400,7 @@ namespace App_Gym
             }
         }
 
-        private void UpdateBtn_Click(object sender, EventArgs e)
+        private async void UpdateBtn_Click(object sender, EventArgs e)
         {
             if (emailtextbox.Text == string.Empty || emailpasstextbox.Text == string.Empty || gymnametextbox.Text == string.Empty)
             {
@@ -165,22 +408,30 @@ namespace App_Gym
             }
             else
             {
-                SqlConnection con = new SqlConnection(constr);
-                SqlCommand cmd = new SqlCommand("Update GymDetails set GymEmailID = @id, Password = @NewPass, GymName = @newName Where GymEMailID = @id", con);
+                var requestData = new myData_send()
+                {
+                    GymEmailID = emailtextbox.Text,
+                    Password = emailpasstextbox.Text,
+                    GymName = UserNameTextBox.Text,
+                };
 
-                cmd.CommandType = CommandType.Text;
-                cmd.Parameters.AddWithValue("@id", emailtextbox.Text);
-                cmd.Parameters.AddWithValue("@NewPass", emailpasstextbox.Text);
-                cmd.Parameters.AddWithValue("@newName", gymnametextbox.Text);
+                try
+                {
+                    string apiUrl = BaseUrl_send + "/" + requestData.GymEmailID;
+                    string jsonData = JsonConvert.SerializeObject(requestData);
+                    HttpContent content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                    var response = await httpClient.PutAsync(apiUrl, content);
 
-
-                con.Open();
-                cmd.ExecuteNonQuery();
-                con.Close();
-                loaddetails();
-                MessageBox.Show("Gym Details Updated Successfully", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-
+                    if (response.IsSuccessStatusCode)
+                    {
+                        MessageBox.Show("Gym Details Updated Successfully", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        loaddetails();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
@@ -197,6 +448,8 @@ namespace App_Gym
         private void pictureBox1_Click(object sender, EventArgs e)
         {
             this.Hide();
+            MainPage mainPage = new MainPage();
+            mainPage.Show();
         }
 
         private void AdminControlPanel_MouseDown(object sender, MouseEventArgs e)
@@ -208,9 +461,26 @@ namespace App_Gym
             }
         }
 
-        private void AdminSettings_Load(object sender, EventArgs e)
+        private async void AdminSettings_Load(object sender, EventArgs e)
         {
-            GetAccountsDetails();
+            try
+            {
+                var response = await httpClient.GetAsync(BaseUrl);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseData = await response.Content.ReadAsStringAsync();
+                    var data = JsonConvert.DeserializeObject<List<myData>>(responseData);
+                    GetAccountsDetails(data);
+                    
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            textBox1.ReadOnly = true;
+            UserTypeBox.Enabled = true;
             AccountsDataGridView.BorderStyle = BorderStyle.None;
             AccountsDataGridView.AlternatingRowsDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#DAE0E2");
             AccountsDataGridView.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
@@ -222,43 +492,52 @@ namespace App_Gym
             AccountsDataGridView.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
             AccountsDataGridView.ColumnHeadersDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#2F363F");
             AccountsDataGridView.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
-
             loaddetails();
         }
 
-        private void loaddetails()
+        private async void loaddetails()
         {
-
-            SqlConnection con = new SqlConnection(constr);
-            SqlCommand cmd = new SqlCommand("Select GymEmailID, Password, GymName from GymDetails", con);
-
-            con.Open();
-            SqlDataReader sdr = cmd.ExecuteReader();
-            while (sdr.Read())
+            try
             {
-                emailtextbox.Text = sdr.GetValue(0).ToString();
-                emailpasstextbox.Text = sdr.GetValue(1).ToString();
-                gymnametextbox.Text = sdr.GetValue(2).ToString();
+                var response = await httpClient.GetAsync(BaseUrl_send);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseData = await response.Content.ReadAsStringAsync();
+                    var data = JsonConvert.DeserializeObject<myData_send[]>(responseData);
+                    foreach (var item in data)
+                    {
+                        EmailLabel.Text = emailtextbox.Text = item.GymEmailID;
+                        PasswordLabel.Text = emailpasstextbox.Text = item.Password;
+                        NameLabel.Text = gymnametextbox.Text = item.GymName;
+                    }
+                    
+                }
             }
-            con.Close();
-
-            EmailLabel.Text = emailtextbox.Text;
-            PasswordLabel.Text = emailpasstextbox.Text;
-            NameLabel.Text = gymnametextbox.Text;
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
-        private void GetAccountsDetails()
+        private void GetAccountsDetails(List<myData> data)
         {
-            SqlConnection con = new SqlConnection(constr);
-            SqlCommand cmd = new SqlCommand("Select * from Accounts", con);
-
-            con.Open();
-            SqlDataReader sdr = cmd.ExecuteReader();
-
-            DataTable dtstaff = new DataTable();
-            dtstaff.Load(sdr);
-            con.Close();
-            AccountsDataGridView.DataSource = dtstaff;
+            DataTable dataTable = new DataTable();
+            dataTable.Columns.Add("UserId", typeof(int));
+            dataTable.Columns.Add("UserType", typeof(string));
+            dataTable.Columns.Add("UserName", typeof(string));
+            dataTable.Columns.Add("UserEmailID", typeof(string));
+            dataTable.Columns.Add("UserPassword", typeof(string));
+            foreach (var item in data)
+            {
+                DataRow row = dataTable.NewRow();
+                row["UserId"] = item.UserId;
+                row["UserType"] = item.UserType;
+                row["UserName"] = item.UserName;
+                row["UserEmailID"] = item.UserEmailID;
+                row["UserPassword"] = item.UserPassword;
+                dataTable.Rows.Add(row);
+            }
+            AccountsDataGridView.DataSource = dataTable;
         }
 
         private void clearall()

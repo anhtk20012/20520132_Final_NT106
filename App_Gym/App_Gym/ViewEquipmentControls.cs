@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -14,11 +16,24 @@ namespace App_Gym
 {
     public partial class ViewEquipmentControls : UserControl
     {
+        class myData
+        {
+            public int EquipmentID { get; set; }
+            public string EquipmentName { get; set; }
+            public string EquipmentType { get; set; }
+            public string EquipmentQuantity { get; set; }
+            public string EquipmentWeight { get; set; }
+            public string EquipmentCost { get; set; }
+            public DateTime PurchasedDate { get; set; }
+        }
+        private const string BaseUrl = "https://localhost:7046/api/EquipmentTables";
+        private HttpClient httpClient;
+
         public ViewEquipmentControls()
         {
             InitializeComponent();
+            httpClient = new HttpClient();
         }
-        string constr = @"Data Source=LATRONGANH\SQLEXPRESS;Initial Catalog=GMSDataBase;Integrated Security=True";
         string characterpattern = @"^[a-zA-Z]+$";
         string phonenregex = "^[0-9]{1}";
 
@@ -56,7 +71,7 @@ namespace App_Gym
             resetsearchboxes();
         }
 
-        private void searchbynameBtn_Click(object sender, EventArgs e)
+        private async void searchbynameBtn_Click(object sender, EventArgs e)
         {
             if (SearchbyEquipName.Text == "Search by Name" || SearchbyEquipName.Text == "")
             {
@@ -70,20 +85,48 @@ namespace App_Gym
             }
             else
             {
-                SqlConnection con = new SqlConnection(constr);
-                SqlCommand cmd = new SqlCommand("Select * from EquipmentTable Where EquipmentName LIKE '%" + SearchbyEquipName.Text + "%'", con);
+                try
+                {
+                    var response = await httpClient.GetAsync(BaseUrl);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var responseData = await response.Content.ReadAsStringAsync();
+                        var data = JsonConvert.DeserializeObject<List<myData>>(responseData);
+                        DataTable dataTable = new DataTable();
+                        dataTable.Columns.Add("EquipmentID", typeof(int));
+                        dataTable.Columns.Add("EquipmentName", typeof(string));
+                        dataTable.Columns.Add("EquipmentType", typeof(string));
+                        dataTable.Columns.Add("EquipmentQuantity", typeof(string));
+                        dataTable.Columns.Add("EquipmentWeight", typeof(string));
+                        dataTable.Columns.Add("EquipmentCost", typeof(string));
+                        dataTable.Columns.Add("PurchasedDate", typeof(DateTime));
 
-                con.Open();
-                SqlDataReader sdr = cmd.ExecuteReader();
-
-                DataTable dtmember = new DataTable();
-                dtmember.Load(sdr);
-                con.Close();
-                EquipmentDataGridView.DataSource = dtmember;
+                        foreach (var item in data)
+                        {
+                            if (SearchbyEquipName.Text == item.EquipmentName)
+                            {
+                                DataRow row = dataTable.NewRow();
+                                row["EquipmentID"] = item.EquipmentID;
+                                row["EquipmentName"] = item.EquipmentName;
+                                row["EquipmentType"] = item.EquipmentType;
+                                row["EquipmentQuantity"] = item.EquipmentQuantity;
+                                row["EquipmentWeight"] = item.EquipmentWeight;
+                                row["EquipmentCost"] = item.EquipmentCost;
+                                row["PurchasedDate"] = item.PurchasedDate;
+                                dataTable.Rows.Add(row);
+                            }
+                        }
+                        EquipmentDataGridView.DataSource = dataTable;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
-        private void SearchbyIdBtn_Click(object sender, EventArgs e)
+        private async void SearchbyIdBtn_Click(object sender, EventArgs e)
         {
             if (SearchbyID.Text == "Search by ID" || SearchbyID.Text == "")
             {
@@ -97,101 +140,145 @@ namespace App_Gym
             }
             else
             {
-                SqlConnection con = new SqlConnection(constr);
-                SqlCommand cmd = new SqlCommand("Select * from EquipmentTable Where EquipmentID LIKE '%" + SearchbyID.Text + "%'", con);
+                try
+                {
+                    var response = await httpClient.GetAsync(BaseUrl);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var responseData = await response.Content.ReadAsStringAsync();
+                        var data = JsonConvert.DeserializeObject<List<myData>>(responseData);
+                        DataTable dataTable = new DataTable();
+                        dataTable.Columns.Add("EquipmentID", typeof(int));
+                        dataTable.Columns.Add("EquipmentName", typeof(string));
+                        dataTable.Columns.Add("EquipmentType", typeof(string));
+                        dataTable.Columns.Add("EquipmentQuantity", typeof(string));
+                        dataTable.Columns.Add("EquipmentWeight", typeof(string));
+                        dataTable.Columns.Add("EquipmentCost", typeof(string));
+                        dataTable.Columns.Add("PurchasedDate", typeof(DateTime));
 
-                con.Open();
-                SqlDataReader sdr = cmd.ExecuteReader();
-
-                DataTable dtmember = new DataTable();
-                dtmember.Load(sdr);
-                con.Close();
-                EquipmentDataGridView.DataSource = dtmember;
+                        foreach (var item in data)
+                        {
+                            if (Int32.Parse(SearchbyID.Text) == item.EquipmentID)
+                            {
+                                DataRow row = dataTable.NewRow();
+                                row["EquipmentID"] = item.EquipmentID;
+                                row["EquipmentName"] = item.EquipmentName;
+                                row["EquipmentType"] = item.EquipmentType;
+                                row["EquipmentQuantity"] = item.EquipmentQuantity;
+                                row["EquipmentWeight"] = item.EquipmentWeight;
+                                row["EquipmentCost"] = item.EquipmentCost;
+                                row["PurchasedDate"] = item.PurchasedDate;
+                                dataTable.Rows.Add(row);
+                            }
+                        }
+                        EquipmentDataGridView.DataSource = dataTable;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
-        private void Updatebtn_Click(object sender, EventArgs e)
+        private async void Updatebtn_Click(object sender, EventArgs e)
         {
             if (isValid())
             {
-                SqlConnection con = new SqlConnection(constr);
+                var requestData = new myData()
+                {
+                    EquipmentID = Int32.Parse(EquipID.Text),
+                    EquipmentName = EquipName.Text,
+                    EquipmentType = EquipmentTypeBox.Text,
+                    EquipmentQuantity = EquipQuantityBox.Text,
+                    EquipmentWeight = EquipWeightBox.Text,
+                    EquipmentCost = EquipCostbox.Text,
+                    PurchasedDate = PurchasedPicked.Value,
 
-                SqlCommand cmd = new SqlCommand("Update EquipmentTable Set EquipmentName = @EquipmentName, EquipmentType = @EquipmentType, Equipmentquantity = @EquipmentQuantity, EquipmentWeight = @EquipmentWeight, EquipmentCost = @EquipmentCost, PurchasedDate = @PurchasedDate Where EquipmentID = @EquipmentID", con);
+                };
+                try
+                {
+                    string apiUrl = BaseUrl + "/" + requestData.EquipmentID;
+                    string jsonData = JsonConvert.SerializeObject(requestData);
+                    HttpContent content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                    var response = await httpClient.PutAsync(apiUrl, content);
 
-                cmd.CommandType = CommandType.Text;
-                cmd.Parameters.AddWithValue("@EquipmentName", EquipName.Text);
-                cmd.Parameters.AddWithValue("@EquipmentType", EquipmentTypeBox.Text);
-                cmd.Parameters.AddWithValue("@EquipmentQuantity", EquipQuantityBox.Text);
-                cmd.Parameters.AddWithValue("@EquipmentWeight", EquipWeightBox.Text);
-                cmd.Parameters.AddWithValue("@EquipmentCost", EquipCostbox.Text);
-                cmd.Parameters.AddWithValue("@PurchasedDate", PurchasedPicked.Value);
-                cmd.Parameters.AddWithValue("@EquipmentID", EquipID.Text);
-
-                con.Open();
-                cmd.ExecuteNonQuery();
-                con.Close();
-
-                MessageBox.Show("updated Successfully", "Updated", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                clearall();
-                GetEquipmentData();
-
+                    if (response.IsSuccessStatusCode)
+                    {
+                        MessageBox.Show("updated Successfully", "Updated", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        clearall();
+                        GetEquipmentData();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
-        private void DeleteBtn_Click(object sender, EventArgs e)
+        private async void DeleteBtn_Click(object sender, EventArgs e)
         {
             if (isValid())
             {
+                try
+                {
+                    string apiUrl = BaseUrl + "/" + Int32.Parse(EquipID.Text);
+                    var response = await httpClient.DeleteAsync(apiUrl);
 
-                SqlConnection con = new SqlConnection(constr);
-                SqlCommand cmd = new SqlCommand("Delete From EquipmentTable Where EquipmentID = @EquipmentID", con);
-
-                cmd.CommandType = CommandType.Text;
-                cmd.Parameters.AddWithValue("@EquipmentID", EquipID.Text);
-
-                con.Open();
-                cmd.ExecuteNonQuery();
-                con.Close();
-
-                MessageBox.Show("Successfully deleted", "Deleted", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                clearall();
-                GetEquipmentData();
+                    if (response.IsSuccessStatusCode)
+                    {
+                        MessageBox.Show("Successfully deleted", "Deleted", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        clearall();
+                        GetEquipmentData();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }                
             }
         }
-        private void GetEquipmentData()
+        private async void GetEquipmentData()
         {
-            DataTable dt = new DataTable();
-            SqlConnection con = new SqlConnection(constr);
-            SqlCommand cmd = new SqlCommand("Select * from EquipmentTable", con);
-
-            con.Open();
-            SqlDataReader sdr = cmd.ExecuteReader();
-
-            dt.Load(sdr);
-            con.Close();
-
-            EquipmentDataGridView.DataSource = dt;
-
-            decimal Total = 0;
-
-            for (int i = 0; i < EquipmentDataGridView.Rows.Count; i++)
+            try
             {
-                Total += Convert.ToDecimal(EquipmentDataGridView.Rows[i].Cells[5].Value);
+                var response = await httpClient.GetAsync(BaseUrl);
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseData = await response.Content.ReadAsStringAsync();
+                    var data = JsonConvert.DeserializeObject<List<myData>>(responseData);
+                    DataTable dataTable = new DataTable();
+                    dataTable.Columns.Add("EquipmentID", typeof(int));
+                    dataTable.Columns.Add("EquipmentName", typeof(string));
+                    dataTable.Columns.Add("EquipmentType", typeof(string));
+                    dataTable.Columns.Add("EquipmentQuantity", typeof(string));
+                    dataTable.Columns.Add("EquipmentWeight", typeof(string));
+                    dataTable.Columns.Add("EquipmentCost", typeof(string));
+                    dataTable.Columns.Add("PurchasedDate", typeof(DateTime));
+                    decimal Total = 0;
+                    foreach (var item in data)
+                    { 
+                        DataRow row = dataTable.NewRow();
+                        row["EquipmentID"] = item.EquipmentID;
+                        row["EquipmentName"] = item.EquipmentName;
+                        row["EquipmentType"] = item.EquipmentType;
+                        row["EquipmentQuantity"] = item.EquipmentQuantity;
+                        row["EquipmentWeight"] = item.EquipmentWeight;
+                        row["EquipmentCost"] = item.EquipmentCost;
+                        row["PurchasedDate"] = item.PurchasedDate;
+                        dataTable.Rows.Add(row);
+                        Total += Convert.ToDecimal(item.EquipmentCost);
+                    }
+                    totalspentlabel.Text = Total.ToString();
+                    totalequiplabel.Text = data.Count.ToString();
+                    EquipmentDataGridView.DataSource = dataTable;
+                }
             }
-
-
-            totalspentlabel.Text = Total.ToString();
-
-            string sql = "Select * from EquipmentTable";
-
-            con.Open();
-            DataSet ds = new DataSet();
-            SqlDataAdapter da = new SqlDataAdapter(sql, con);
-            da.Fill(ds);
-            SqlCommandBuilder builder = new SqlCommandBuilder(da);
-            EquipmentDataGridView.DataSource = ds.Tables[0];
-
-            totalequiplabel.Text = ds.Tables[0].Rows.Count.ToString();
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void SearchbyID_KeyPress(object sender, KeyPressEventArgs e)

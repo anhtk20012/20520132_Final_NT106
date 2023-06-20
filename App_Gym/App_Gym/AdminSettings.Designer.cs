@@ -60,7 +60,6 @@
             this.label15 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.NewPassTextBox = new System.Windows.Forms.TextBox();
-            this.SaveBtn = new System.Windows.Forms.Button();
             this.EmailIDTextBox = new System.Windows.Forms.TextBox();
             this.ConfirmPassTextBox = new System.Windows.Forms.TextBox();
             this.label14 = new System.Windows.Forms.Label();
@@ -278,7 +277,6 @@
             this.Cards1.Controls.Add(this.label15);
             this.Cards1.Controls.Add(this.label7);
             this.Cards1.Controls.Add(this.NewPassTextBox);
-            this.Cards1.Controls.Add(this.SaveBtn);
             this.Cards1.Controls.Add(this.EmailIDTextBox);
             this.Cards1.Controls.Add(this.ConfirmPassTextBox);
             this.Cards1.Controls.Add(this.label14);
@@ -330,7 +328,8 @@
             this.UserTypeBox.FormattingEnabled = true;
             this.UserTypeBox.Items.AddRange(new object[] {
             "Admin",
-            "User"});
+            "User",
+            "Trainer"});
             this.UserTypeBox.Location = new System.Drawing.Point(181, 67);
             this.UserTypeBox.Name = "UserTypeBox";
             this.UserTypeBox.Size = new System.Drawing.Size(213, 24);
@@ -354,7 +353,7 @@
             this.DeleteBtn.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.DeleteBtn.Font = new System.Drawing.Font("Century Gothic", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.DeleteBtn.ForeColor = System.Drawing.Color.White;
-            this.DeleteBtn.Location = new System.Drawing.Point(298, 334);
+            this.DeleteBtn.Location = new System.Drawing.Point(211, 335);
             this.DeleteBtn.Name = "DeleteBtn";
             this.DeleteBtn.Size = new System.Drawing.Size(103, 36);
             this.DeleteBtn.TabIndex = 146;
@@ -369,7 +368,7 @@
             this.EditBtn.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.EditBtn.Font = new System.Drawing.Font("Century Gothic", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.EditBtn.ForeColor = System.Drawing.Color.White;
-            this.EditBtn.Location = new System.Drawing.Point(163, 334);
+            this.EditBtn.Location = new System.Drawing.Point(76, 335);
             this.EditBtn.Name = "EditBtn";
             this.EditBtn.Size = new System.Drawing.Size(103, 36);
             this.EditBtn.TabIndex = 142;
@@ -440,21 +439,6 @@
             this.NewPassTextBox.Size = new System.Drawing.Size(213, 28);
             this.NewPassTextBox.TabIndex = 137;
             this.NewPassTextBox.UseSystemPasswordChar = true;
-            // 
-            // SaveBtn
-            // 
-            this.SaveBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(232)))), ((int)(((byte)(41)))), ((int)(((byte)(11)))));
-            this.SaveBtn.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.SaveBtn.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.SaveBtn.Font = new System.Drawing.Font("Century Gothic", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.SaveBtn.ForeColor = System.Drawing.Color.White;
-            this.SaveBtn.Location = new System.Drawing.Point(27, 334);
-            this.SaveBtn.Name = "SaveBtn";
-            this.SaveBtn.Size = new System.Drawing.Size(103, 36);
-            this.SaveBtn.TabIndex = 139;
-            this.SaveBtn.Text = "&SAVE";
-            this.SaveBtn.UseVisualStyleBackColor = false;
-            this.SaveBtn.Click += new System.EventHandler(this.SaveBtn_Click);
             // 
             // EmailIDTextBox
             // 
@@ -596,7 +580,6 @@
         private System.Windows.Forms.Label label15;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.TextBox NewPassTextBox;
-        private System.Windows.Forms.Button SaveBtn;
         private System.Windows.Forms.TextBox EmailIDTextBox;
         private System.Windows.Forms.TextBox ConfirmPassTextBox;
         private System.Windows.Forms.Label label14;

@@ -28,23 +28,11 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DashboardControl));
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DashboardControl));
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
-            this.TotalequipmentsDGV = new System.Windows.Forms.DataGridView();
-            this.EarningsDGV = new System.Windows.Forms.DataGridView();
-            this.totalstaffDGV = new System.Windows.Forms.DataGridView();
-            this.totalclientsDGV = new System.Windows.Forms.DataGridView();
             this.label13 = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
             this.equipmentpanel = new System.Windows.Forms.Panel();
@@ -70,10 +58,6 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.dateTime = new System.Windows.Forms.DateTimePicker();
-            ((System.ComponentModel.ISupportInitialize)(this.TotalequipmentsDGV)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.EarningsDGV)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.totalstaffDGV)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.totalclientsDGV)).BeginInit();
             this.equipmentpanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
             this.clientfeepanel.SuspendLayout();
@@ -86,130 +70,6 @@
             this.clientspanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
-            // 
-            // TotalequipmentsDGV
-            // 
-            this.TotalequipmentsDGV.AllowUserToAddRows = false;
-            this.TotalequipmentsDGV.AllowUserToDeleteRows = false;
-            this.TotalequipmentsDGV.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.TotalequipmentsDGV.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(44)))), ((int)(((byte)(51)))), ((int)(((byte)(53)))));
-            this.TotalequipmentsDGV.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle1.Padding = new System.Windows.Forms.Padding(0, 2, 0, 2);
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.TotalequipmentsDGV.DefaultCellStyle = dataGridViewCellStyle1;
-            this.TotalequipmentsDGV.Location = new System.Drawing.Point(82, 363);
-            this.TotalequipmentsDGV.Margin = new System.Windows.Forms.Padding(4);
-            this.TotalequipmentsDGV.Name = "TotalequipmentsDGV";
-            this.TotalequipmentsDGV.ReadOnly = true;
-            this.TotalequipmentsDGV.RowHeadersWidth = 51;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle2.Padding = new System.Windows.Forms.Padding(0, 2, 0, 2);
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.Color.White;
-            this.TotalequipmentsDGV.RowsDefaultCellStyle = dataGridViewCellStyle2;
-            this.TotalequipmentsDGV.RowTemplate.Height = 25;
-            this.TotalequipmentsDGV.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.TotalequipmentsDGV.Size = new System.Drawing.Size(48, 25);
-            this.TotalequipmentsDGV.TabIndex = 49;
-            this.TotalequipmentsDGV.Visible = false;
-            // 
-            // EarningsDGV
-            // 
-            this.EarningsDGV.AllowUserToAddRows = false;
-            this.EarningsDGV.AllowUserToDeleteRows = false;
-            this.EarningsDGV.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.EarningsDGV.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(44)))), ((int)(((byte)(51)))), ((int)(((byte)(53)))));
-            this.EarningsDGV.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle3.Padding = new System.Windows.Forms.Padding(0, 2, 0, 2);
-            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.EarningsDGV.DefaultCellStyle = dataGridViewCellStyle3;
-            this.EarningsDGV.Location = new System.Drawing.Point(318, 363);
-            this.EarningsDGV.Margin = new System.Windows.Forms.Padding(4);
-            this.EarningsDGV.Name = "EarningsDGV";
-            this.EarningsDGV.ReadOnly = true;
-            this.EarningsDGV.RowHeadersWidth = 51;
-            dataGridViewCellStyle4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle4.Padding = new System.Windows.Forms.Padding(0, 2, 0, 2);
-            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.Color.White;
-            this.EarningsDGV.RowsDefaultCellStyle = dataGridViewCellStyle4;
-            this.EarningsDGV.RowTemplate.Height = 25;
-            this.EarningsDGV.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.EarningsDGV.Size = new System.Drawing.Size(48, 25);
-            this.EarningsDGV.TabIndex = 48;
-            this.EarningsDGV.Visible = false;
-            // 
-            // totalstaffDGV
-            // 
-            this.totalstaffDGV.AllowUserToAddRows = false;
-            this.totalstaffDGV.AllowUserToDeleteRows = false;
-            this.totalstaffDGV.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.totalstaffDGV.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(44)))), ((int)(((byte)(51)))), ((int)(((byte)(53)))));
-            this.totalstaffDGV.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle5.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle5.Padding = new System.Windows.Forms.Padding(0, 2, 0, 2);
-            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.totalstaffDGV.DefaultCellStyle = dataGridViewCellStyle5;
-            this.totalstaffDGV.Location = new System.Drawing.Point(318, 169);
-            this.totalstaffDGV.Margin = new System.Windows.Forms.Padding(4);
-            this.totalstaffDGV.Name = "totalstaffDGV";
-            this.totalstaffDGV.ReadOnly = true;
-            this.totalstaffDGV.RowHeadersWidth = 51;
-            dataGridViewCellStyle6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle6.Padding = new System.Windows.Forms.Padding(0, 2, 0, 2);
-            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.Color.White;
-            this.totalstaffDGV.RowsDefaultCellStyle = dataGridViewCellStyle6;
-            this.totalstaffDGV.RowTemplate.Height = 25;
-            this.totalstaffDGV.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.totalstaffDGV.Size = new System.Drawing.Size(48, 25);
-            this.totalstaffDGV.TabIndex = 47;
-            this.totalstaffDGV.Visible = false;
-            // 
-            // totalclientsDGV
-            // 
-            this.totalclientsDGV.AllowUserToAddRows = false;
-            this.totalclientsDGV.AllowUserToDeleteRows = false;
-            this.totalclientsDGV.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.totalclientsDGV.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(44)))), ((int)(((byte)(51)))), ((int)(((byte)(53)))));
-            this.totalclientsDGV.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle7.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle7.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle7.Padding = new System.Windows.Forms.Padding(0, 2, 0, 2);
-            dataGridViewCellStyle7.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle7.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.totalclientsDGV.DefaultCellStyle = dataGridViewCellStyle7;
-            this.totalclientsDGV.Location = new System.Drawing.Point(82, 169);
-            this.totalclientsDGV.Margin = new System.Windows.Forms.Padding(4);
-            this.totalclientsDGV.Name = "totalclientsDGV";
-            this.totalclientsDGV.ReadOnly = true;
-            this.totalclientsDGV.RowHeadersWidth = 51;
-            dataGridViewCellStyle8.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle8.Padding = new System.Windows.Forms.Padding(0, 2, 0, 2);
-            dataGridViewCellStyle8.SelectionForeColor = System.Drawing.Color.White;
-            this.totalclientsDGV.RowsDefaultCellStyle = dataGridViewCellStyle8;
-            this.totalclientsDGV.RowTemplate.Height = 25;
-            this.totalclientsDGV.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.totalclientsDGV.Size = new System.Drawing.Size(48, 25);
-            this.totalclientsDGV.TabIndex = 46;
-            this.totalclientsDGV.Visible = false;
             // 
             // label13
             // 
@@ -416,24 +276,24 @@
             this.ExpiredAccountsList.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.ExpiredAccountsList.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(44)))), ((int)(((byte)(51)))), ((int)(((byte)(53)))));
             this.ExpiredAccountsList.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle9.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle9.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle9.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle9.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle9.Padding = new System.Windows.Forms.Padding(0, 2, 0, 2);
-            dataGridViewCellStyle9.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle9.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle9.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.ExpiredAccountsList.DefaultCellStyle = dataGridViewCellStyle9;
+            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle5.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle5.Padding = new System.Windows.Forms.Padding(0, 2, 0, 2);
+            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.ExpiredAccountsList.DefaultCellStyle = dataGridViewCellStyle5;
             this.ExpiredAccountsList.Location = new System.Drawing.Point(522, 259);
             this.ExpiredAccountsList.Margin = new System.Windows.Forms.Padding(4);
             this.ExpiredAccountsList.Name = "ExpiredAccountsList";
             this.ExpiredAccountsList.ReadOnly = true;
             this.ExpiredAccountsList.RowHeadersWidth = 51;
-            dataGridViewCellStyle10.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle10.Padding = new System.Windows.Forms.Padding(0, 2, 0, 2);
-            dataGridViewCellStyle10.SelectionForeColor = System.Drawing.Color.White;
-            this.ExpiredAccountsList.RowsDefaultCellStyle = dataGridViewCellStyle10;
+            dataGridViewCellStyle6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle6.Padding = new System.Windows.Forms.Padding(0, 2, 0, 2);
+            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.Color.White;
+            this.ExpiredAccountsList.RowsDefaultCellStyle = dataGridViewCellStyle6;
             this.ExpiredAccountsList.RowTemplate.Height = 25;
             this.ExpiredAccountsList.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.ExpiredAccountsList.Size = new System.Drawing.Size(415, 129);
@@ -446,24 +306,24 @@
             this.ExpiryDates.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.ExpiryDates.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(44)))), ((int)(((byte)(51)))), ((int)(((byte)(53)))));
             this.ExpiryDates.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle11.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle11.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle11.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle11.Padding = new System.Windows.Forms.Padding(0, 2, 0, 2);
-            dataGridViewCellStyle11.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle11.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle11.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.ExpiryDates.DefaultCellStyle = dataGridViewCellStyle11;
+            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle7.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle7.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle7.Padding = new System.Windows.Forms.Padding(0, 2, 0, 2);
+            dataGridViewCellStyle7.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle7.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.ExpiryDates.DefaultCellStyle = dataGridViewCellStyle7;
             this.ExpiryDates.Location = new System.Drawing.Point(522, 83);
             this.ExpiryDates.Margin = new System.Windows.Forms.Padding(4);
             this.ExpiryDates.Name = "ExpiryDates";
             this.ExpiryDates.ReadOnly = true;
             this.ExpiryDates.RowHeadersWidth = 51;
-            dataGridViewCellStyle12.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle12.Padding = new System.Windows.Forms.Padding(0, 2, 0, 2);
-            dataGridViewCellStyle12.SelectionForeColor = System.Drawing.Color.White;
-            this.ExpiryDates.RowsDefaultCellStyle = dataGridViewCellStyle12;
+            dataGridViewCellStyle8.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle8.Padding = new System.Windows.Forms.Padding(0, 2, 0, 2);
+            dataGridViewCellStyle8.SelectionForeColor = System.Drawing.Color.White;
+            this.ExpiryDates.RowsDefaultCellStyle = dataGridViewCellStyle8;
             this.ExpiryDates.RowTemplate.Height = 25;
             this.ExpiryDates.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.ExpiryDates.Size = new System.Drawing.Size(415, 129);
@@ -546,10 +406,6 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.TotalequipmentsDGV);
-            this.Controls.Add(this.EarningsDGV);
-            this.Controls.Add(this.totalstaffDGV);
-            this.Controls.Add(this.totalclientsDGV);
             this.Controls.Add(this.label13);
             this.Controls.Add(this.label12);
             this.Controls.Add(this.equipmentpanel);
@@ -565,10 +421,6 @@
             this.Name = "DashboardControl";
             this.Size = new System.Drawing.Size(941, 588);
             this.Load += new System.EventHandler(this.DashboardControl_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.TotalequipmentsDGV)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.EarningsDGV)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.totalstaffDGV)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.totalclientsDGV)).EndInit();
             this.equipmentpanel.ResumeLayout(false);
             this.equipmentpanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).EndInit();
@@ -590,10 +442,6 @@
         }
 
         #endregion
-        private System.Windows.Forms.DataGridView TotalequipmentsDGV;
-        private System.Windows.Forms.DataGridView EarningsDGV;
-        private System.Windows.Forms.DataGridView totalstaffDGV;
-        private System.Windows.Forms.DataGridView totalclientsDGV;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.Panel equipmentpanel;
